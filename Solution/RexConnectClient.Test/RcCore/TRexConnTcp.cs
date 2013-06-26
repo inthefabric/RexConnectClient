@@ -47,7 +47,7 @@ namespace RexConnectClient.Test.RcCore {
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		/*--------------------------------------------------------------------------------------------*/
 		private RexConnTcp BuildTcp() {
-			return new RexConnTcp("rexster", 8185);
+			return new RexConnTcp(RexConnHost, RexConnPort);
 		}
 		
 	}

@@ -42,7 +42,7 @@ namespace RexConnectClient.Test.RcCore {
 		[Category(Integration)]
 		public void CreateTcpClient() {
 			var r = new Request();
-			var ctx = new RexConnContext(r, "rexster", 8185);
+			var ctx = new RexConnContext(r, RexConnHost, RexConnPort);
 			IRexConnTcp tcp = ctx.CreateTcpClient();
 
 			Assert.NotNull(tcp, "Result should not be null.");

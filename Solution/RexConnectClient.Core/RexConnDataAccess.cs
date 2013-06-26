@@ -40,7 +40,7 @@ namespace RexConnectClient.Core {
 
 				if ( s != null ) {
 					var sr = new StreamReader(s);
-					Context.Log("Error", "Gremlin", sr.ReadToEnd());
+					Context.Log("Error", "WebException", sr.ReadToEnd());
 				}
 			}
 			catch ( Exception e ) {
@@ -52,9 +52,8 @@ namespace RexConnectClient.Core {
 			result.ExecutionMilliseconds = (int)sw.ElapsedMilliseconds;
 
 			if ( unhandled != null ) {
-				unhandled = new Exception("Unhandled exception:\nRequestJson = "+
+				throw new Exception("Unhandled exception:\nRequestJson = "+
 					result.RequestJson+"\nResponseJson = "+result.ResponseJson, unhandled);
-				throw unhandled;
 			}
 
 			return result;
@@ -88,12 +87,6 @@ namespace RexConnectClient.Core {
 			while ( sb.Length < respLen ) {
 				data = new byte[respLen];
 				int bytes = stream.Read(data, 0, data.Length);
-
-				if ( bytes == 0 ) {
-					throw new Exception("Empty read from NetworkStream. "+
-						"Expected "+respLen+" chars, received "+sb.Length+" total.");
-				}
-
 				sb.Append(Encoding.ASCII.GetString(data, 0, bytes));
 			}
 
