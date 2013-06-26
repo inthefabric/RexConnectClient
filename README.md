@@ -3,7 +3,7 @@
 RexConnectClient is a client library for communication with [RexConnect](https://github.com/inthefabric/RexConnect) (for C#/.NET).
 
 #### Install with NuGet
-- [RexConnectClient.Core](http://nuget.org/packages/RexConnectClient)
+[RexConnectClient.Core](http://nuget.org/packages/RexConnectClient)
 ```
 PM> Install-Package RexConnectClient 
 ```
