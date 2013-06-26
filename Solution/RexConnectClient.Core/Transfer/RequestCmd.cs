@@ -12,6 +12,9 @@ namespace RexConnectClient.Core.Transfer {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		/*--------------------------------------------------------------------------------------------*/
+		public RequestCmd() {}
+		
+		/*--------------------------------------------------------------------------------------------*/
 		public RequestCmd(string pCommand, params string[] pArgs) {
 			Cmd = pCommand;
 			Args = new List<string>(pArgs);
@@ -20,12 +23,12 @@ namespace RexConnectClient.Core.Transfer {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		/*--------------------------------------------------------------------------------------------*/
-		public static RequestCmd CreateQueryCommand(string pScript) {
+		internal static RequestCmd CreateQuery(string pScript) {
 			return new RequestCmd(RexConn.Command.Query.ToString().ToLower(), JsonUnquote(pScript));
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
-		public static RequestCmd CreateQueryCommand(string pScript, IDictionary<string,string> pParams){
+		internal static RequestCmd CreateQuery(string pScript, IDictionary<string, string> pParams) {
 			string q = JsonUnquote(pScript);
 			var sb = new StringBuilder();
 
@@ -41,13 +44,13 @@ namespace RexConnectClient.Core.Transfer {
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
-		public static RequestCmd CreateSessionCommand(RexConn.SessionAction pAction) {
+		internal static RequestCmd CreateSession(RexConn.SessionAction pAction) {
 			return new RequestCmd(RexConn.Command.Session.ToString().ToLower(),
 				pAction.ToString().ToLower());
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
-		public static RequestCmd CreateConfigCommand(RexConn.ConfigSetting pSetting, string pValue) {
+		internal static RequestCmd CreateConfig(RexConn.ConfigSetting pSetting, string pValue) {
 			return new RequestCmd(RexConn.Command.Session.ToString().ToLower(),
 				pSetting.ToString().ToLower(), pValue);
 		}

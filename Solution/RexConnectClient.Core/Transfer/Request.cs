@@ -6,8 +6,6 @@ namespace RexConnectClient.Core.Transfer {
 	/*================================================================================================*/
 	public class Request {
 
-		public static bool CreateRequestsInDebugMode;
-
 		public string ReqId { get; set; }
 		public string SessId { get; set; }
 		public IList<RequestCmd> CmdList { get; set; }
@@ -15,23 +13,47 @@ namespace RexConnectClient.Core.Transfer {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		/*--------------------------------------------------------------------------------------------*/
-		public Request(string pRequestId) {
-			ReqId = pRequestId;
+		public Request() {
 			CmdList = new List<RequestCmd>();
-
-			if ( CreateRequestsInDebugMode ) {
-				CmdList.Add(RequestCmd.CreateConfigCommand(RexConn.ConfigSetting.Debug, "1"));
-			}
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
-		public Request(string pRequestId, string pScript, IDictionary<string,string> pParams) :
-																					this(pRequestId) {
-			CmdList.Add(RequestCmd.CreateQueryCommand(pScript, pParams));
+		public Request(string pRequestId) : this() {
+			ReqId = pRequestId;
+		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		public Request(string pRequestId, string pSessionId) : this(pRequestId) {
+			SessId = pSessionId;
+		}
+
+
+		////////////////////////////////////////////////////////////////////////////////////////////////
+		/*--------------------------------------------------------------------------------------------*/
+		public RequestCmd AddQuery(string pScript) {
+			return AddCmd(RequestCmd.CreateQuery(pScript));
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
-		public Request(string pRequestId, string pScript) : this(pRequestId, pScript, null) {}
+		public RequestCmd AddQuery(string pScript, IDictionary<string, string> pParams) {
+			return AddCmd(RequestCmd.CreateQuery(pScript, pParams));
+		}
+
+		/*--------------------------------------------------------------------------------------------*/
+		public RequestCmd AddSessionAction(RexConn.SessionAction pAction) {
+			return AddCmd(RequestCmd.CreateSession(pAction));
+		}
+
+		/*--------------------------------------------------------------------------------------------*/
+		public RequestCmd AddConfigSetting(RexConn.ConfigSetting pSetting, string pValue) {
+			return AddCmd(RequestCmd.CreateConfig(pSetting, pValue));
+		}
+
+		/*--------------------------------------------------------------------------------------------*/
+		private RequestCmd AddCmd(RequestCmd pCmd) {
+			CmdList.Add(pCmd);
+			return pCmd;
+		}
 
 		
 		////////////////////////////////////////////////////////////////////////////////////////////////
