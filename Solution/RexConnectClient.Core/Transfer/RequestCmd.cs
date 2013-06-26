@@ -51,7 +51,7 @@ namespace RexConnectClient.Core.Transfer {
 
 		/*--------------------------------------------------------------------------------------------*/
 		internal static RequestCmd CreateConfig(RexConn.ConfigSetting pSetting, string pValue) {
-			return new RequestCmd(RexConn.Command.Session.ToString().ToLower(),
+			return new RequestCmd(RexConn.Command.Config.ToString().ToLower(),
 				pSetting.ToString().ToLower(), pValue);
 		}
 
