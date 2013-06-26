@@ -36,11 +36,13 @@
     </Compile>
     <Compile Include="Common\TestResponseResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RcCore\TRexConnContext.cs" />
     <Compile Include="RcCore\Result\TResponseResult.cs" />
     <Compile Include="RcCore\Result\TGraphElement.cs" />
     <Compile Include="RcCore\Result\TTextResultList.cs" />
     <Compile Include="RcCore\Transfer\TRequestCmd.cs" />
     <Compile Include="RcCore\Transfer\TRequest.cs" />
+    <Compile Include="RcCore\TRexConnTcp.cs" />
     <Compile Include="Utils\TestUtil.cs" />
     <Compile Include="TestBase.cs" />
   </ItemGroup>
