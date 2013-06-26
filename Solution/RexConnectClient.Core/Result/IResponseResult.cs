@@ -38,7 +38,7 @@ namespace RexConnectClient.Core.Result {
 		IList<ITextResultList> GetTextResults();
 
 		/*--------------------------------------------------------------------------------------------*/
-		ITextResultList GetTextResultAt(int pCommandIndex);
+		ITextResultList GetTextResultsAt(int pCommandIndex);
 
 	}
 

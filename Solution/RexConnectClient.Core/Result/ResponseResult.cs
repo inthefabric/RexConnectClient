@@ -29,7 +29,7 @@ namespace RexConnectClient.Core.Result {
 		public ResponseResult(IRexConnContext pContext) {
 			Context = pContext;
 			Request = pContext.Request;
-			RequestJson = JsonSerializer.SerializeToString(Request);
+			RequestJson = Request.ToRequestJson();
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
@@ -39,10 +39,12 @@ namespace RexConnectClient.Core.Result {
 			Response = JsonSerializer.DeserializeFromString<Response>(ResponseJson);
 
 			if ( Response == null ) {
+				IsError = true;
 				throw new Exception("Response is null.");
 			}
 
 			if ( Response.Err != null ) {
+				IsError = true;
 				throw new Exception("Response has an error: "+Response.Err);
 			}
 
@@ -116,95 +118,10 @@ namespace RexConnectClient.Core.Result {
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
-		public virtual ITextResultList GetTextResultAt(int pCommandIndex) {
+		public virtual ITextResultList GetTextResultsAt(int pCommandIndex) {
 			GetTextResults();
 			return vTextResults[pCommandIndex];
 		}
-
-
-		////////////////////////////////////////////////////////////////////////////////////////////////
-		/*--------------------------------------------------------------------------------------------* /
-		public virtual void FillCommandTextResults() {
-			int count = CommandResults.Count;
-			int i = 0;
-			string json = (string)ResponseJson.Clone();
-
-			while ( i < count && json != null ) {
-				json = BuildTextListResults(json, CommandResults[i++]);
-			}
-		}
-
-		/*--------------------------------------------------------------------------------------------* /
-		protected static string BuildTextListResults(string pRemainingJson, ResponseCmdResult pCmdRes) {
-			const string cmdResults = "\"results\":[";
-			var list = new List<string>();
-			int startI = pRemainingJson.IndexOf(cmdResults);
-
-			if ( startI == -1 ) {
-				return null;
-			}
-
-			startI += cmdResults.Length;
-			string text = pRemainingJson.Substring(startI);
-
-			////
-
-			int i = 0;
-			int j = -1;
-			int lastIndex = text.Length-1;
-			bool inQuote = false;
-			int inCurly = 0;
-			int inSquare = 1; //looking for a closing square brace
-
-			foreach ( char c in text ) {
-				++j;
-
-				switch ( c ) {
-					case '"':
-						inQuote = !inQuote;
-						break;
-
-					case '{':
-						inCurly++;
-						break;
-
-					case '}':
-						inCurly--;
-						break;
-
-					case '[':
-						inSquare++;
-						break;
-
-					case ']':
-						inSquare--;
-						break;
-				}
-
-				if ( j == lastIndex ) {
-					throw new Exception("Invalid JSON found in this text: "+pRemainingJson);
-				}
-
-				if ( inSquare == 0 ) {
-					list.Add(text.Substring(i, j-i).Trim());
-					i = j+1;
-					break;
-				}
-
-				if ( inQuote || inCurly > 0 || inSquare > 0 ) {
-					continue;
-				}
-
-				if ( c == ',' ) {
-					list.Add(text.Substring(i, j-i).Trim());
-					i = j+1;
-					continue;
-				}
-			}
-
-			pCmdRes.TextResults = new TextResultList(list);
-			return pRemainingJson.Substring(i);
-		}*/
 
 	}
 

@@ -30,22 +30,22 @@ namespace RexConnectClient.Core.Transfer {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		/*--------------------------------------------------------------------------------------------*/
-		public RequestCmd AddQuery(string pScript) {
+		public virtual RequestCmd AddQuery(string pScript) {
 			return AddCmd(RequestCmd.CreateQuery(pScript));
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
-		public RequestCmd AddQuery(string pScript, IDictionary<string, string> pParams) {
+		public virtual RequestCmd AddQuery(string pScript, IDictionary<string, string> pParams) {
 			return AddCmd(RequestCmd.CreateQuery(pScript, pParams));
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
-		public RequestCmd AddSessionAction(RexConn.SessionAction pAction) {
+		public virtual RequestCmd AddSessionAction(RexConn.SessionAction pAction) {
 			return AddCmd(RequestCmd.CreateSession(pAction));
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
-		public RequestCmd AddConfigSetting(RexConn.ConfigSetting pSetting, string pValue) {
+		public virtual RequestCmd AddConfigSetting(RexConn.ConfigSetting pSetting, string pValue) {
 			return AddCmd(RequestCmd.CreateConfig(pSetting, pValue));
 		}
 

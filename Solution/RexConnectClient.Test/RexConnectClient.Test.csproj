@@ -34,7 +34,9 @@
     <Compile Include="..\..\Global\GlobalAssemblyVersion.cs">
       <Link>Properties\GlobalAssemblyVersion.cs</Link>
     </Compile>
+    <Compile Include="Common\TestResponseResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RcCore\Result\TResponseResult.cs" />
     <Compile Include="RcCore\Result\TGraphElement.cs" />
     <Compile Include="RcCore\Result\TTextResultList.cs" />
     <Compile Include="Utils\TestUtil.cs" />
@@ -55,9 +57,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Common\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\RexConnectClient.Core\RexConnectClient.Core.csproj">
       <Project>{F71292E1-2F2C-4F7A-9B9C-B72E0DAD080C}</Project>
