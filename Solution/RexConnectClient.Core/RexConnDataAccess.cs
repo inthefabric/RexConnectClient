@@ -26,12 +26,17 @@ namespace RexConnectClient.Core {
 		public IResponseResult Execute() {
 			var sw = Stopwatch.StartNew();
 			Exception unhandled = null;
+			ResponseErrException respErrEx = null;
 
 			IResponseResult result = Context.CreateResponseResult();
 
 			try {
 				Context.Log("Debug", "Request", result.RequestJson);
 				GetRawResult(result);
+			}
+			catch ( ResponseErrException re ) {
+				respErrEx = re;
+				Context.Log("Error", "ResponseErrException", re.Message);
 			}
 			catch ( WebException we ) {
 				unhandled = we;
@@ -51,6 +56,10 @@ namespace RexConnectClient.Core {
 
 			result.ExecutionMilliseconds = (int)sw.ElapsedMilliseconds;
 
+			if ( respErrEx != null ) {
+				throw respErrEx;
+			}
+			
 			if ( unhandled != null ) {
 				throw new Exception("Unhandled exception:\nRequestJson = "+
 					result.RequestJson+"\nResponseJson = "+result.ResponseJson, unhandled);

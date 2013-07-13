@@ -97,16 +97,17 @@ namespace RexConnectClient.Test.RcCore {
 
 			r = new Request("6");
 			r.AddQuery("x"); //not available outside of session
-			TestUtil.CheckThrows<Exception>(true, () => ExecuteRequest(r));
+			TestUtil.CheckThrows<ResponseErrException>(true, () => ExecuteRequest(r));
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
-		[Test]
+		[TestCase("x")]
+		[TestCase("^invalid-gremlin/script!")]
 		[Category(Integration)]
-		public void ExecuteErrQuery() {
+		public void ExecuteErrQuery(string pScript) {
 			var r = new Request("1234");
-			r.AddQuery("x");
-			TestUtil.CheckThrows<Exception>(true, () => ExecuteRequest(r));
+			r.AddQuery(pScript);
+			TestUtil.CheckThrows<ResponseErrException>(true, () => ExecuteRequest(r));
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
@@ -115,7 +116,7 @@ namespace RexConnectClient.Test.RcCore {
 		public void ExecuteErrConfig() {
 			var r = new Request("1234");
 			r.AddConfigSetting(RexConn.ConfigSetting.Pretty, "invalid");
-			TestUtil.CheckThrows<Exception>(true, () => ExecuteRequest(r));
+			TestUtil.CheckThrows<ResponseErrException>(true, () => ExecuteRequest(r));
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
@@ -124,7 +125,7 @@ namespace RexConnectClient.Test.RcCore {
 		public void ExecuteErrSession() {
 			var r = new Request("1234");
 			r.AddSessionAction(RexConn.SessionAction.Close);
-			TestUtil.CheckThrows<Exception>(true, () => ExecuteRequest(r));
+			TestUtil.CheckThrows<ResponseErrException>(true, () => ExecuteRequest(r));
 		}
 
 

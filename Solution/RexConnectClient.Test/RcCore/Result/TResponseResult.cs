@@ -136,7 +136,8 @@ namespace RexConnectClient.Test.RcCore.Result {
 			const string err = "something went horribly askew";
 			const string json = "{\"reqId\":\"test\",\"err\":\""+err+"\"}";
 
-			Exception e = TestUtil.CheckThrows<Exception>(true, () => vResult.SetResponseJson(json));
+			Exception e = TestUtil.CheckThrows<ResponseErrException>(
+				true, () => vResult.SetResponseJson(json));
 			Assert.True(vResult.IsError, "Incorrect IsError.");
 			Assert.True(e.Message.Contains(err), "Incorrect exception.");
 		}
@@ -165,11 +166,16 @@ namespace RexConnectClient.Test.RcCore.Result {
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
-		[Test]
-		public void SetResponseErrorDuplicate() {
-			vResult.SetResponseError(null);
-			Exception e = TestUtil.CheckThrows<Exception>(true, () => vResult.SetResponseError(null));
-			Assert.True(e.Message.Contains("already set"), "Incorrect exception.");
+		[TestCase("something", "duplicate", "something|duplicate")]
+		[TestCase(null, "duplicate", "duplicate")]
+		public void SetResponseErrorDuplicate(string pErr1, string pErr2, string pExpect) {
+			vResult.SetResponseError(pErr1);
+			vResult.SetResponseError(pErr2);
+			
+			Assert.NotNull(vResult.Response, "Response should be filled.");
+			Assert.NotNull(vResult.Response.CmdList, "Response.CmdList should be filled.");
+			Assert.AreEqual(pExpect, vResult.Response.Err, "Incorrect Response.Err.");
+			Assert.True(vResult.IsError, "Incorrect IsError.");
 		}
 
 

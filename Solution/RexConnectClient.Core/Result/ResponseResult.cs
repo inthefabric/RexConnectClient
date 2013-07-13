@@ -34,7 +34,10 @@ namespace RexConnectClient.Core.Result {
 
 		/*--------------------------------------------------------------------------------------------*/
 		public virtual void SetResponseJson(string pResponseJson) {
-			VerifyNoResponse();
+			if ( Response != null ) {
+				throw new Exception("Response is already set.");
+			}
+			
 			ResponseJson = pResponseJson;
 			Response = JsonSerializer.DeserializeFromString<Response>(ResponseJson);
 
@@ -45,7 +48,7 @@ namespace RexConnectClient.Core.Result {
 
 			if ( Response.Err != null ) {
 				IsError = true;
-				throw new Exception("Response has an error: "+Response.Err);
+				throw new ResponseErrException(this);
 			}
 
 			for ( int i = 0 ; i < Response.CmdList.Count ; ++i ) {
@@ -59,18 +62,18 @@ namespace RexConnectClient.Core.Result {
 
 		/*--------------------------------------------------------------------------------------------*/
 		public virtual void SetResponseError(string pErr) {
-			VerifyNoResponse();
 			IsError = true;
-
-			Response = new Response();
-			Response.Err = pErr;
-			Response.CmdList = new List<ResponseCmd>();
-		}
-		
-		/*--------------------------------------------------------------------------------------------*/
-		private void VerifyNoResponse() {
-			if ( Response != null ) {
-				throw new Exception("Response is already set.");
+			
+			if ( Response == null ) {
+				Response = new Response();
+				Response.CmdList = new List<ResponseCmd>();
+			}
+			
+			if ( Response.Err == null || Response.Err.Length == 0 ) {
+				Response.Err = pErr;
+			}
+			else {
+				Response.Err += "|"+pErr;
 			}
 		}
 
