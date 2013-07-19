@@ -250,6 +250,81 @@ namespace RexConnectClient.Test.RcCore {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		/*--------------------------------------------------------------------------------------------*/
+		[TestCase(1)]
+		[TestCase(2)]
+		[TestCase(5)]
+		[TestCase(10)]
+		[TestCase(100)]
+		[TestCase(1000)]
+		[Category(Integration)]
+		public void ExecuteTiming(int pQueryCount) {
+			var r = new Request("x");
+			r.AddSessionAction(RexConn.SessionAction.Start);
+			r.AddQuery("g");
+			r.AddSessionAction(RexConn.SessionAction.Close);
+			ExecuteRequest(r);
+
+			// Execute separate requests
+			
+			var sw = Stopwatch.StartNew();
+			long reqTime = 0;
+
+			r = new Request("x");
+			r.AddSessionAction(RexConn.SessionAction.Start);
+			IResponseResult result = ExecuteRequest(r);
+			reqTime += result.Response.Timer;
+
+			string sessId = result.Response.SessId;
+
+			for ( int i = 0 ; i < pQueryCount ; ++i ) {
+				r = new Request("x", sessId);
+				r.AddQuery("g");
+				result = ExecuteRequest(r);
+				reqTime += result.Response.Timer;
+			}
+
+			r = new Request("x", sessId);
+			r.AddSessionAction(RexConn.SessionAction.Close);
+			result = ExecuteRequest(r);
+			reqTime += result.Response.Timer;
+
+			sw.Stop();
+
+			// Execute one combined request
+
+			var sw2 = Stopwatch.StartNew();
+			long reqTime2 = 0;
+
+			r = new Request("x");
+			r.AddSessionAction(RexConn.SessionAction.Start);
+
+			for ( int i = 0 ; i < pQueryCount ; ++i ) {
+				r.AddQuery("g");
+			}
+
+			r.AddSessionAction(RexConn.SessionAction.Close);
+			result = ExecuteRequest(r);
+			reqTime2 += result.Response.Timer;
+
+			sw2.Stop();
+			
+			// Report results
+
+			Console.WriteLine();
+			Console.WriteLine("Query Count: "+pQueryCount);
+			Console.WriteLine("Separate requests: "+
+				sw.Elapsed.TotalMilliseconds+"ms total, "+reqTime+"ms RexConnect");
+			Console.WriteLine("Combined requests: "+
+				sw2.Elapsed.TotalMilliseconds+"ms total, "+reqTime2+"ms RexConnect");
+			Console.WriteLine("Combined improvement:"+
+				(sw.Elapsed.TotalMilliseconds/sw2.Elapsed.TotalMilliseconds).ToString("###.0")+
+				"x (total), "+(reqTime/(double)reqTime2).ToString("###.0")+"x (RexConnect)"
+			);
+		}
+
+
+		////////////////////////////////////////////////////////////////////////////////////////////////
+		/*--------------------------------------------------------------------------------------------*/
 		private IResponseResult ExecuteRequest(Request pReq) {
 			var ctx = new RexConnContext(pReq, RexConnHost, RexConnPort);
 			var da = new RexConnDataAccess(ctx);
