@@ -6,6 +6,8 @@ namespace RexConnectClient.Core.Transfer {
 	/*================================================================================================*/
 	public class RequestCmd {
 
+		public string CmdId { get; set; }
+		public IList<string> Cond { get; set; }
 		public string Cmd { get; set; }
 		public IList<string> Args { get; set; }
 
@@ -18,6 +20,15 @@ namespace RexConnectClient.Core.Transfer {
 		public RequestCmd(string pCommand, params string[] pArgs) {
 			Cmd = pCommand;
 			Args = new List<string>(pArgs);
+		}
+
+		/*--------------------------------------------------------------------------------------------*/
+		public void AddConditionalCommandId(string pCommandId) {
+			if ( Cond == null ) {
+				Cond = new List<string>();
+			}
+
+			Cond.Add(pCommandId);
 		}
 
 

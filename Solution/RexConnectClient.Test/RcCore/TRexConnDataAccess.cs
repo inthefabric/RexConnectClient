@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using Moq;
 using NUnit.Framework;
 using RexConnectClient.Core;
@@ -98,6 +100,123 @@ namespace RexConnectClient.Test.RcCore {
 			r = new Request("6");
 			r.AddQuery("x"); //not available outside of session
 			TestUtil.CheckThrows<ResponseErrException>(true, () => ExecuteRequest(r));
+		}
+
+		/*--------------------------------------------------------------------------------------------*/
+		[Test]
+		[Category(Integration)]
+		public void ExecuteConditional() {
+			const string reqId = "1234";
+
+			var r = new Request(reqId);
+			//r.AddConfigSetting(RexConn.ConfigSetting.Debug, "1");
+			r.AddSessionAction(RexConn.SessionAction.Start);
+
+			RequestCmd none = r.AddQuery("");
+			RequestCmd zero = r.AddQuery("0");
+			RequestCmd nul = r.AddQuery("null");
+			RequestCmd fals = r.AddQuery("false");
+			RequestCmd empty = r.AddQuery("x=''");
+
+			RequestCmd one = r.AddQuery("1");
+			RequestCmd tru = r.AddQuery("true");
+			RequestCmd g = r.AddQuery("g");
+
+			none.CmdId = "none";
+			zero.CmdId = "zero";
+			nul.CmdId = "nul";
+			fals.CmdId = "fals";
+			empty.CmdId = "empty";
+
+			one.CmdId = "one";
+			tru.CmdId = "tru";
+			g.CmdId = "g";
+
+			// Expected to skip
+
+			RequestCmd test = r.AddQuery("throw new Exception('noneTest')");
+			test.AddConditionalCommandId(none.CmdId);
+
+			RequestCmd zeroTest = r.AddQuery("throw new Exception('zeroTest')");
+			zeroTest.CmdId = "zeroTest";
+			zeroTest.AddConditionalCommandId(zero.CmdId);
+
+			test = r.AddQuery("throw new Exception('nulTest')");
+			test.AddConditionalCommandId(nul.CmdId);
+
+			test = r.AddQuery("throw new Exception('falsTest')");
+			test.AddConditionalCommandId(fals.CmdId);
+
+			test = r.AddQuery("throw new Exception('emptyTest')");
+			test.AddConditionalCommandId(empty.CmdId);
+
+			RequestCmd zeroTestTest = r.AddQuery("throw new Exception('zeroTestTest')");
+			zeroTestTest.AddConditionalCommandId(zeroTest.CmdId); //an unexecuted command
+
+			test = r.AddQuery("throw new Exception('comboTest1')");
+			test.AddConditionalCommandId(one.CmdId);
+			test.AddConditionalCommandId(nul.CmdId);
+
+			test = r.AddQuery("throw new Exception('comboTest2')");
+			test.AddConditionalCommandId(tru.CmdId);
+			test.AddConditionalCommandId(one.CmdId);
+			test.AddConditionalCommandId(zero.CmdId);
+			test.AddConditionalCommandId(g.CmdId);
+			test.AddConditionalCommandId(fals.CmdId);
+
+			// Expected to pass
+
+			test = r.AddQuery("[val:'one']");
+			test.CmdId = "oneTest";
+			test.AddConditionalCommandId(one.CmdId);
+
+			test = r.AddQuery("[val:'tru']");
+			test.CmdId = "truTest";
+			test.AddConditionalCommandId(tru.CmdId);
+
+			test = r.AddQuery("[val:'g']");
+			test.CmdId = "gTest";
+			test.AddConditionalCommandId(g.CmdId);
+
+			test = r.AddQuery("[val:'all']");
+			test.CmdId = "allTest";
+			test.AddConditionalCommandId(tru.CmdId);
+			test.AddConditionalCommandId(one.CmdId);
+			test.AddConditionalCommandId(g.CmdId);
+
+			// Finish the session
+
+			r.AddSessionAction(RexConn.SessionAction.Close);
+
+			IResponseResult result = ExecuteRequest(r);
+
+			Assert.NotNull(result, "Result should not be null.");
+			Assert.NotNull(result.Response, "Result.Response should not be null.");
+			Assert.NotNull(result.ResponseJson, "Result.ResponseJson should not be null.");
+
+			Assert.False(result.IsError, "Incorrect IsError.");
+			Assert.AreEqual(reqId, result.Response.ReqId, "Incorrect Response.ReqId.");
+			Assert.Null(result.Response.SessId, "Response.SessId should be null.");
+			Assert.AreEqual(22, result.Response.CmdList.Count, "Incorrect Response.CmdList.Count.");
+
+			var cmdMap = new Dictionary<string, ResponseCmd>();
+
+			foreach ( ResponseCmd rc in result.Response.CmdList ) {
+				if ( rc.CmdId == null ) {
+					continue;
+				}
+
+				cmdMap.Add(rc.CmdId, rc);
+			}
+
+			var passChecks = new[] { "one", "tru", "g", "all" };
+
+			foreach ( string c in passChecks ) {
+				Assert.AreEqual(c, cmdMap[c+"Test"].Results[0]["val"],
+					"Failed '"+c+"' command response.");
+			}
+
+			Console.WriteLine("TIME: "+result.Response.Timer+"ms");
 		}
 
 		/*--------------------------------------------------------------------------------------------*/

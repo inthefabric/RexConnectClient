@@ -14,6 +14,8 @@ namespace RexConnectClient.Test.RcCore.Transfer {
 		public void New() {
 			var rc = new RequestCmd();
 
+			Assert.Null(rc.CmdId, "CmdId should be null.");
+			Assert.Null(rc.Cond, "Cond should be null.");
 			Assert.Null(rc.Cmd, "Cmd should be null.");
 			Assert.Null(rc.Args, "Args should be null.");
 		}
@@ -37,6 +39,32 @@ namespace RexConnectClient.Test.RcCore.Transfer {
 
 			Assert.AreEqual(cmd, rc.Cmd, "Incorrect Cmd.");
 			Assert.AreEqual(args, rc.Args, "Incorrect Args.");
+		}
+
+		/*--------------------------------------------------------------------------------------------*/
+		[Test]
+		public void AddConditionalCommandId() {
+			var rc = new RequestCmd();
+			rc.AddConditionalCommandId("a0");
+
+			Assert.NotNull(rc.Cond, "Cond should be filled.");
+			Assert.AreEqual(1, rc.Cond.Count, "Incorrect Cond.Count.");
+			Assert.AreEqual("a0", rc.Cond[0], "Cond[0] is incorrect.");
+		}
+
+		/*--------------------------------------------------------------------------------------------*/
+		[Test]
+		public void AddConditionalCommandIdMulti() {
+			var rc = new RequestCmd();
+			rc.AddConditionalCommandId("a0");
+			rc.AddConditionalCommandId("b1");
+			rc.AddConditionalCommandId("c2");
+
+			Assert.NotNull(rc.Cond, "Cond should be filled.");
+			Assert.AreEqual(3, rc.Cond.Count, "Incorrect Cond.Count.");
+			Assert.AreEqual("a0", rc.Cond[0], "Cond[0] is incorrect.");
+			Assert.AreEqual("b1", rc.Cond[1], "Cond[1] is incorrect.");
+			Assert.AreEqual("c2", rc.Cond[2], "Cond[2] is incorrect.");
 		}
 		
 	}
