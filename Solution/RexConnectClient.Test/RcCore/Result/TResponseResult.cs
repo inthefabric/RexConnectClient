@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Moq;
 using NUnit.Framework;
@@ -18,7 +19,8 @@ namespace RexConnectClient.Test.RcCore.Result {
 		private Mock<IRexConnContext> vMockCtx;
 		private TestResponseResult vResult;
 		private Response vTestResponse;
-		private string vTestResultJson;
+		private string vMapResultJson;
+		private string vTextResultJson;
 
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
@@ -70,7 +72,18 @@ namespace RexConnectClient.Test.RcCore.Result {
 
 			////
 
-			vTestResultJson =
+			vMapResultJson =
+				@"{
+					'reqId':'MyReqId',
+					'cmdList':[
+						{'results':{'MyInt':123456, 'MyLong':1234567890123456, 'MyStr':'testing'}},
+						{'results':[{'MyByte':2, 'MyFloat':987.654},{'MyStr':'second map'}]},
+						{'results':[{'MyBool1':true},{'MyBool2':false},{},{'MyBool3':true}]},
+						{'results':{}}
+					]
+				}";
+
+			vTextResultJson =
 				@"{
 					'reqId':'MyReqId',
 					'cmdList':[
@@ -81,7 +94,8 @@ namespace RexConnectClient.Test.RcCore.Result {
 					]
 				}";
 
-			vTestResultJson = vTestResultJson.Replace("'", "\"");
+			vMapResultJson = vMapResultJson.Replace("'", "\"");
+			vTextResultJson = vTextResultJson.Replace("'", "\"");
 		}
 
 
@@ -183,6 +197,71 @@ namespace RexConnectClient.Test.RcCore.Result {
 		/*--------------------------------------------------------------------------------------------*/
 		[TestCase(true)]
 		[TestCase(false)]
+		public void GetMapResults(bool pTwice) {
+			vResult.SetResponseJson(vMapResultJson);
+			IList<IList<IDictionary<string, string>>> lists = vResult.GetMapResults();
+
+			Assert.NotNull(lists, "Result should not be null.");
+			Assert.AreEqual(4, lists.Count, "Incorrect lists length.");
+
+			if ( pTwice ) {
+				Assert.AreEqual(lists, vResult.GetMapResults(), "Incorrect cached result.");
+			}
+		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		[TestCase(0, new[] {
+			"MyInt", "123456",
+			"MyLong", "1234567890123456",
+			"MyStr", "testing"
+		})]
+		[TestCase(1, new[] {
+			"MyByte", "2",
+			"MyFloat", "987.654",
+			"#END", null,
+			"MyStr", "second map"
+		})]
+		[TestCase(2, new[] {
+			"MyBool1", "true",
+			"#END", null,
+			"MyBool2", "false",
+			"#END", null,
+			"#END", null,
+			"MyBool3", "true"
+		})]
+		[TestCase(3, new string[] {})]
+		public void GetMapResultsAt(int pIndex, string[] pExpectPairs) {
+			vResult.SetResponseJson(vMapResultJson);
+			IList<IDictionary<string, string>> list = vResult.GetMapResultsAt(pIndex);
+
+			Assert.NotNull(list, "Result should not be null.");
+			int cmdMapI = 0;
+
+			for ( int i = 0 ; i < pExpectPairs.Length ; i += 2 ) {
+				string key = pExpectPairs[i];
+				string val = pExpectPairs[i+1];
+
+				if ( key == "#END" ) {
+					//Console.WriteLine("cmd "+pIndex+", map "+cmdMapI+": #END");
+					cmdMapI++;
+					continue;
+				}
+
+				Assert.LessOrEqual(cmdMapI, list.Count, "Incorrect list length.");
+
+				IDictionary<string, string> map = list[cmdMapI];
+				Assert.NotNull(map, "Map at "+cmdMapI+" should be filled.");
+				Assert.True(map.ContainsKey(key), "Map at "+cmdMapI+" is missing key '"+key+"'.");
+				Assert.AreEqual(val, map[key], "Map at "+cmdMapI+": incorrect value for '"+key+"'.");
+				//Console.WriteLine("cmd "+pIndex+", map "+cmdMapI+": "+key+" = "+val);
+			}
+		}
+
+
+		////////////////////////////////////////////////////////////////////////////////////////////////
+		/*--------------------------------------------------------------------------------------------*/
+		[TestCase(true)]
+		[TestCase(false)]
 		public void GetGraphElements(bool pTwice) {
 			vResult.SetTestResponse(vTestResponse);
 			IList<IList<IGraphElement>> lists = vResult.GetGraphElements();
@@ -245,7 +324,7 @@ namespace RexConnectClient.Test.RcCore.Result {
 		[TestCase(true)]
 		[TestCase(false)]
 		public void GetTextResults(bool pTwice) {
-			vResult.SetResponseJson(vTestResultJson);
+			vResult.SetResponseJson(vTextResultJson);
 			IList<ITextResultList> lists = vResult.GetTextResults();
 
 			Assert.NotNull(lists, "Result should not be null.");
@@ -262,11 +341,130 @@ namespace RexConnectClient.Test.RcCore.Result {
 		[TestCase(2, new [] { "true" })]
 		[TestCase(3, new string[] {})]
 		public void GetTextResultsAt(int pIndex, string[] pExpect) {
-			vResult.SetResponseJson(vTestResultJson);
+			vResult.SetResponseJson(vTextResultJson);
 			ITextResultList list = vResult.GetTextResultsAt(pIndex);
 
 			Assert.NotNull(list, "Result should not be null.");
 			Assert.AreEqual(pExpect, list.Values, "Incorrect list Values.");
+		}
+
+
+		////////////////////////////////////////////////////////////////////////////////////////////////
+		/*--------------------------------------------------------------------------------------------*/
+		[Test]
+		public void GetCustomResults() {
+			vResult.SetResponseJson(vMapResultJson);
+			IList<IList<CustomRes>> lists = vResult.GetCustomResults((c,m) => CustomRes.Convert(m));
+
+			Assert.NotNull(lists, "Result should not be null.");
+			Assert.AreEqual(4, lists.Count, "Incorrect lists length.");
+		}
+
+		/*--------------------------------------------------------------------------------------------*/
+		[Test]
+		public void GetCustomResultsAt0() {
+			IList<CustomRes> list = GetCustomResultsAt(0, 1);
+
+			CustomRes cr = list[0];
+			Assert.AreEqual(123456, cr.MyInt, "Incorrect MyInt.");
+			Assert.AreEqual(1234567890123456, cr.MyLong, "Incorrect MyLong.");
+			Assert.AreEqual("testing", cr.MyStr, "Incorrect MyStr.");
+			Assert.Null(cr.MyByte, "Incorrect MyByte.");
+			Assert.Null(cr.MyFloat, "Incorrect MyFloat.");
+			Assert.Null(cr.MyBool1, "Incorrect MyBool1.");
+		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		[Test]
+		public void GetCustomResultsAt1() {
+			IList<CustomRes> list = GetCustomResultsAt(1, 2);
+
+			CustomRes cr = list[0];
+			Assert.Null(cr.MyInt, "Incorrect MyInt.");
+			Assert.Null(cr.MyLong, "Incorrect MyLong.");
+			Assert.Null(cr.MyStr, "Incorrect MyStr.");
+			Assert.AreEqual(2, cr.MyByte, "Incorrect MyByte.");
+			Assert.AreEqual(987654, (int)(cr.MyFloat*1000), "Incorrect MyFloat.");
+			Assert.Null(cr.MyBool1, "Incorrect MyBool1.");
+
+			cr = list[1];
+			Assert.Null(cr.MyInt, "Incorrect MyInt.");
+			Assert.Null(cr.MyLong, "Incorrect MyLong.");
+			Assert.AreEqual("second map", cr.MyStr, "Incorrect MyStr.");
+			Assert.Null(cr.MyByte, "Incorrect MyByte.");
+			Assert.Null(cr.MyFloat, "Incorrect MyFloat.");
+			Assert.Null(cr.MyBool1, "Incorrect MyBool1.");
+		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		[Test]
+		public void GetCustomResultsAt2() {
+			IList<CustomRes> list = GetCustomResultsAt(2, 4);
+
+			CustomRes cr = list[0];
+			Assert.Null(cr.MyInt, "Incorrect MyInt.");
+			Assert.Null(cr.MyLong, "Incorrect MyLong.");
+			Assert.Null(cr.MyStr, "Incorrect MyStr.");
+			Assert.Null(cr.MyByte, "Incorrect MyByte.");
+			Assert.Null(cr.MyFloat, "Incorrect MyFloat.");
+			Assert.AreEqual(true, cr.MyBool1, "Incorrect MyBool1.");
+
+			CheckAllNull(list[1]);
+			CheckAllNull(list[2]);
+			CheckAllNull(list[3]);
+		}
+
+		/*--------------------------------------------------------------------------------------------*/
+		[Test]
+		public void GetCustomResultsAt3() {
+			IList<CustomRes> list = GetCustomResultsAt(3, 1);
+			CheckAllNull(list[0]);
+		}
+
+		/*--------------------------------------------------------------------------------------------*/
+		private IList<CustomRes> GetCustomResultsAt(int pIndex, int pExpectLen) {
+			vResult.SetResponseJson(vMapResultJson);
+			IList<CustomRes> list = vResult.GetCustomResultsAt(pIndex, (c, m) => CustomRes.Convert(m));
+
+			Assert.NotNull(list, "Result should not be null.");
+			Assert.AreEqual(pExpectLen, list.Count, "Incorrect list count.");
+			return list;
+		}
+
+		/*--------------------------------------------------------------------------------------------*/
+		private void CheckAllNull(CustomRes pRes) {
+			Assert.Null(pRes.MyInt, "Incorrect MyInt.");
+			Assert.Null(pRes.MyLong, "Incorrect MyLong.");
+			Assert.Null(pRes.MyStr, "Incorrect MyStr.");
+			Assert.Null(pRes.MyByte, "Incorrect MyByte.");
+			Assert.Null(pRes.MyFloat, "Incorrect MyFloat.");
+			Assert.Null(pRes.MyBool1, "Incorrect MyBool1.");
+		}
+	}
+
+
+	/*================================================================================================*/
+	internal class CustomRes {
+
+		public int? MyInt { get; set; }
+		public long? MyLong { get; set; }
+		public string MyStr { get; set; }
+		public byte? MyByte { get; set; }
+		public float? MyFloat { get; set; }
+		public bool? MyBool1 { get; set; }
+		
+		
+		////////////////////////////////////////////////////////////////////////////////////////////////
+		/*--------------------------------------------------------------------------------------------*/
+		public static CustomRes Convert(IDictionary<string, string> pMap) {
+			var cr = new CustomRes();
+			cr.MyInt = (pMap.ContainsKey("MyInt") ? int.Parse(pMap["MyInt"]) : (int?)null);
+			cr.MyLong = (pMap.ContainsKey("MyLong") ? long.Parse(pMap["MyLong"]) : (long?)null);
+			cr.MyStr = (pMap.ContainsKey("MyStr") ? pMap["MyStr"] : null);
+			cr.MyByte = (pMap.ContainsKey("MyByte") ? byte.Parse(pMap["MyByte"]) : (byte?)null);
+			cr.MyFloat = (pMap.ContainsKey("MyFloat") ? float.Parse(pMap["MyFloat"]) : (float?)null);
+			cr.MyBool1 = (pMap.ContainsKey("MyBool1") ? bool.Parse(pMap["MyBool1"]) : (bool?)null);
+			return cr;
 		}
 
 	}

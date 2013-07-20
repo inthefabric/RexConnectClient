@@ -20,6 +20,7 @@ namespace RexConnectClient.Core.Result {
 		public bool IsError { get; protected set; }
 		public int ExecutionMilliseconds { get; set; }
 
+		private IList<IList<IDictionary<string, string>>> vMapResults;
 		private IList<IList<IGraphElement>> vElementResults;
 		private IList<ITextResultList> vTextResults;
 
@@ -69,12 +70,41 @@ namespace RexConnectClient.Core.Result {
 				Response.CmdList = new List<ResponseCmd>();
 			}
 			
-			if ( Response.Err == null || Response.Err.Length == 0 ) {
+			if ( string.IsNullOrEmpty(Response.Err) ) {
 				Response.Err = pErr;
 			}
 			else {
 				Response.Err += "|"+pErr;
 			}
+		}
+
+
+		////////////////////////////////////////////////////////////////////////////////////////////////
+		/*--------------------------------------------------------------------------------------------*/
+		public virtual IList<IList<IDictionary<string, string>>> GetMapResults() {
+			if ( vMapResults != null ) {
+				return vMapResults;
+			}
+
+			vMapResults = new List<IList<IDictionary<string, string>>>();
+
+			foreach ( ResponseCmd cmd in Response.CmdList ) {
+				var cmdMaps = new List<IDictionary<string, string>>();
+
+				foreach ( JsonObject jo in cmd.Results ) {
+					cmdMaps.Add(jo.ToDictionary()); //create a copy
+				}
+
+				vMapResults.Add(cmdMaps);
+			}
+
+			return vMapResults;
+		}
+
+		/*--------------------------------------------------------------------------------------------*/
+		public virtual IList<IDictionary<string, string>> GetMapResultsAt(int pCommandIndex) {
+			GetMapResults();
+			return vMapResults[pCommandIndex];
 		}
 
 		
@@ -124,6 +154,25 @@ namespace RexConnectClient.Core.Result {
 		public virtual ITextResultList GetTextResultsAt(int pCommandIndex) {
 			GetTextResults();
 			return vTextResults[pCommandIndex];
+		}
+
+
+		////////////////////////////////////////////////////////////////////////////////////////////////
+		/*--------------------------------------------------------------------------------------------*/
+		public virtual IList<IList<T>> GetCustomResults<T>(
+										Func<string, IDictionary<string, string>, T> pFromCmdIdAndMap) {
+			return Response.CmdList
+				.Select((t,i) => GetCustomResultsAt(i, pFromCmdIdAndMap))
+				.ToList();
+		}
+
+		/*--------------------------------------------------------------------------------------------*/
+		public virtual IList<T> GetCustomResultsAt<T>(int pCommandIndex,
+										Func<string, IDictionary<string, string>, T> pFromCmdIdAndMap) {
+			ResponseCmd cmd = Response.CmdList[pCommandIndex];
+			return cmd.Results
+				.Select(jo => pFromCmdIdAndMap(cmd.CmdId, jo))
+				.ToList();
 		}
 
 	}
