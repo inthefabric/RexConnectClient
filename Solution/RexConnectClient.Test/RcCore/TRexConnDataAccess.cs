@@ -255,7 +255,7 @@ namespace RexConnectClient.Test.RcCore {
 		[TestCase(5)]
 		[TestCase(10)]
 		[TestCase(100)]
-		[TestCase(1000)]
+		//[TestCase(1000)]
 		[Category(Integration)]
 		public void ExecuteTiming(int pQueryCount) {
 			var r = new Request("x");

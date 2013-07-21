@@ -89,6 +89,11 @@ namespace RexConnectClient.Core.Result {
 			vMapResults = new List<IList<IDictionary<string, string>>>();
 
 			foreach ( ResponseCmd cmd in Response.CmdList ) {
+				if ( cmd.Results == null ) {
+					vMapResults.Add(null);
+					continue;
+				}
+
 				var cmdMaps = new List<IDictionary<string, string>>();
 
 				foreach ( JsonObject jo in cmd.Results ) {
@@ -118,6 +123,11 @@ namespace RexConnectClient.Core.Result {
 			vElementResults = new List<IList<IGraphElement>>();
 
 			foreach ( ResponseCmd cmd in Response.CmdList ) {
+				if ( cmd.Results == null ) {
+					vElementResults.Add(null);
+					continue;
+				}
+
 				vElementResults.Add(
 					cmd.Results.Select(GraphElement.Build).Cast<IGraphElement>().ToList()
 				);
@@ -144,7 +154,7 @@ namespace RexConnectClient.Core.Result {
 			vTextResults = new List<ITextResultList>();
 
 			foreach ( StringsResponseCmd src in sr.CmdList ) {
-				vTextResults.Add(new TextResultList(src.Results));
+				vTextResults.Add(src.Results == null ? null : new TextResultList(src.Results));
 			}
 
 			return vTextResults;
@@ -170,6 +180,11 @@ namespace RexConnectClient.Core.Result {
 		public virtual IList<T> GetCustomResultsAt<T>(int pCommandIndex,
 										Func<string, IDictionary<string, string>, T> pFromCmdIdAndMap) {
 			ResponseCmd cmd = Response.CmdList[pCommandIndex];
+
+			if ( cmd.Results == null ) {
+				return null;
+			}
+
 			return cmd.Results
 				.Select(jo => pFromCmdIdAndMap(cmd.CmdId, jo))
 				.ToList();

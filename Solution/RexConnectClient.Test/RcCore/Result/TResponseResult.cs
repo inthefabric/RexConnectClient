@@ -70,6 +70,10 @@ namespace RexConnectClient.Test.RcCore.Result {
 				rc.Results.Add(joEdge);
 			}
 
+			rc = new ResponseCmd();
+			rc.Results = null;
+			vTestResponse.CmdList.Add(rc);
+
 			////
 
 			vMapResultJson =
@@ -79,7 +83,9 @@ namespace RexConnectClient.Test.RcCore.Result {
 						{'results':{'MyInt':123456, 'MyLong':1234567890123456, 'MyStr':'testing'}},
 						{'results':[{'MyByte':2, 'MyFloat':987.654},{'MyStr':'second map'}]},
 						{'results':[{'MyBool1':true},{'MyBool2':false},{},{'MyBool3':true}]},
-						{'results':{}}
+						{'results':{}},
+						{'results':null},
+						{}
 					]
 				}";
 
@@ -90,7 +96,9 @@ namespace RexConnectClient.Test.RcCore.Result {
 						{'results':[123456, 1234567890123456, 'testing']},
 						{'results':[2, 987.654]},
 						{'results':[true]},
-						{'results':[]}
+						{'results':[]},
+						{'results':null},
+						{}
 					]
 				}";
 
@@ -202,7 +210,7 @@ namespace RexConnectClient.Test.RcCore.Result {
 			IList<IList<IDictionary<string, string>>> lists = vResult.GetMapResults();
 
 			Assert.NotNull(lists, "Result should not be null.");
-			Assert.AreEqual(4, lists.Count, "Incorrect lists length.");
+			Assert.AreEqual(6, lists.Count, "Incorrect lists length.");
 
 			if ( pTwice ) {
 				Assert.AreEqual(lists, vResult.GetMapResults(), "Incorrect cached result.");
@@ -257,6 +265,15 @@ namespace RexConnectClient.Test.RcCore.Result {
 			}
 		}
 
+		/*--------------------------------------------------------------------------------------------*/
+		[TestCase(4)]
+		[TestCase(5)]
+		public void GetMapResultsAtNull(int pIndex) {
+			vResult.SetResponseJson(vMapResultJson);
+			IList<IDictionary<string, string>> list = vResult.GetMapResultsAt(pIndex);
+			Assert.Null(list, "Result should be null.");
+		}
+
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		/*--------------------------------------------------------------------------------------------*/
@@ -267,7 +284,7 @@ namespace RexConnectClient.Test.RcCore.Result {
 			IList<IList<IGraphElement>> lists = vResult.GetGraphElements();
 
 			Assert.NotNull(lists, "Result should not be null.");
-			Assert.AreEqual(3, lists.Count, "Incorrect lists length.");
+			Assert.AreEqual(4, lists.Count, "Incorrect lists length.");
 
 			if ( pTwice ) {
 				Assert.AreEqual(lists, vResult.GetGraphElements(), "Incorrect cached result.");
@@ -318,6 +335,14 @@ namespace RexConnectClient.Test.RcCore.Result {
 			}
 		}
 
+		/*--------------------------------------------------------------------------------------------*/
+		[Test]
+		public void GetGraphElementsAt3() {
+			vResult.SetTestResponse(vTestResponse);
+			IList<IGraphElement> list = vResult.GetGraphElementsAt(3);
+			Assert.Null(list, "Result should be null.");
+		}
+
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		/*--------------------------------------------------------------------------------------------*/
@@ -328,7 +353,7 @@ namespace RexConnectClient.Test.RcCore.Result {
 			IList<ITextResultList> lists = vResult.GetTextResults();
 
 			Assert.NotNull(lists, "Result should not be null.");
-			Assert.AreEqual(4, lists.Count, "Incorrect lists length.");
+			Assert.AreEqual(6, lists.Count, "Incorrect lists length.");
 
 			if ( pTwice ) {
 				Assert.AreEqual(lists, vResult.GetTextResults(), "Incorrect cached result.");
@@ -348,6 +373,15 @@ namespace RexConnectClient.Test.RcCore.Result {
 			Assert.AreEqual(pExpect, list.Values, "Incorrect list Values.");
 		}
 
+		/*--------------------------------------------------------------------------------------------*/
+		[TestCase(4)]
+		[TestCase(5)]
+		public void GetTextResultsAtNull(int pIndex) {
+			vResult.SetResponseJson(vTextResultJson);
+			ITextResultList list = vResult.GetTextResultsAt(pIndex);
+			Assert.Null(list, "Result should be null.");
+		}
+
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		/*--------------------------------------------------------------------------------------------*/
@@ -357,7 +391,7 @@ namespace RexConnectClient.Test.RcCore.Result {
 			IList<IList<CustomRes>> lists = vResult.GetCustomResults((c,m) => CustomRes.Convert(m));
 
 			Assert.NotNull(lists, "Result should not be null.");
-			Assert.AreEqual(4, lists.Count, "Incorrect lists length.");
+			Assert.AreEqual(6, lists.Count, "Incorrect lists length.");
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
@@ -422,6 +456,15 @@ namespace RexConnectClient.Test.RcCore.Result {
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
+		[TestCase(4)]
+		[TestCase(5)]
+		public void GetCustomResultsAtNull(int pIndex) {
+			vResult.SetResponseJson(vMapResultJson);
+			IList<CustomRes> list = vResult.GetCustomResultsAt(pIndex, (c, m) => CustomRes.Convert(m));
+			Assert.Null(list, "List should be null.");
+		}
+
+		/*--------------------------------------------------------------------------------------------*/
 		private IList<CustomRes> GetCustomResultsAt(int pIndex, int pExpectLen) {
 			vResult.SetResponseJson(vMapResultJson);
 			IList<CustomRes> list = vResult.GetCustomResultsAt(pIndex, (c, m) => CustomRes.Convert(m));
@@ -457,6 +500,10 @@ namespace RexConnectClient.Test.RcCore.Result {
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		/*--------------------------------------------------------------------------------------------*/
 		public static CustomRes Convert(IDictionary<string, string> pMap) {
+			if ( pMap == null ) {
+				return null;
+			}
+
 			var cr = new CustomRes();
 			cr.MyInt = (pMap.ContainsKey("MyInt") ? int.Parse(pMap["MyInt"]) : (int?)null);
 			cr.MyLong = (pMap.ContainsKey("MyLong") ? long.Parse(pMap["MyLong"]) : (long?)null);
