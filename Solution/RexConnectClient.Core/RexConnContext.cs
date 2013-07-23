@@ -10,6 +10,7 @@ namespace RexConnectClient.Core {
 		public Request Request { get; private set; }
 		public string HostName { get; private set; }
 		public int Port { get; private set; }
+		public LogFunc Logger { get; set; }
 
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
@@ -18,6 +19,10 @@ namespace RexConnectClient.Core {
 			Request = pRequest;
 			HostName = pHostName;
 			Port = pPort;
+
+			Logger = ((level, cat, text, ex) =>
+				Console.WriteLine(level+" | "+cat+" | "+text+(ex == null ? "" : " | "+ex))
+			);
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
@@ -35,9 +40,11 @@ namespace RexConnectClient.Core {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		/*--------------------------------------------------------------------------------------------*/
-		public virtual void Log(string pType, string pCategory, string pText,Exception pException=null){
-			Console.WriteLine(pType+" | "+pCategory+" | "+pText+
-				(pException == null ? "" : " | "+pException));
+		public delegate void LogFunc(string pLevel, string pCategory, string pText, Exception pEx=null);
+
+		/*--------------------------------------------------------------------------------------------*/
+		public virtual void Log(string pLevel, string pCategory, string pText, Exception pEx=null) {
+			Logger(pLevel, pCategory, pText, pEx);
 		}
 
 	}
