@@ -56,6 +56,27 @@ namespace RexConnectClient.Test.RcCore {
 		/*--------------------------------------------------------------------------------------------*/
 		[Test]
 		[Category(Integration)]
+		public void ExecuteRaw() {
+			const string reqId = "1234";
+
+			var r = new Request(reqId);
+			r.AddQuery("999");
+
+			var ctx = new RexConnContext(r, RexConnHost, RexConnPort);
+			var da = new RexConnDataAccess(ctx);
+			string result = da.ExecuteRaw();
+
+			const string expectPattern = 
+				@"\{""reqId"":""1234"",""timer"":\d+,""cmdList"":\["+
+					@"\{""timer"":\d+,""results"":\[999\]\}"+
+				@"\]\}";
+
+			StringAssert.IsMatch(expectPattern, result, "Incorrect result: "+result);
+		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		[Test]
+		[Category(Integration)]
 		public void ExecuteSessions() {
 			var r = new Request("1");
 			r.AddSessionAction(RexConn.SessionAction.Start);

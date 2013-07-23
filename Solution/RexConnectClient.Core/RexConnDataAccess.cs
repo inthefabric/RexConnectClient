@@ -54,7 +54,8 @@ namespace RexConnectClient.Core {
 				result.SetResponseError(e+"");
 			}
 
-			result.ExecutionMilliseconds = (int)sw.ElapsedMilliseconds;
+			sw.Stop();
+			result.ExecutionMilliseconds = (int)sw.Elapsed.TotalMilliseconds;
 
 			if ( respErrEx != null ) {
 				throw respErrEx;
@@ -67,9 +68,18 @@ namespace RexConnectClient.Core {
 
 			return result;
 		}
-
+		
 		/*--------------------------------------------------------------------------------------------*/
-		protected virtual void GetRawResult(IResponseResult pResult) {
+		public string ExecuteRaw() {
+			IResponseResult result = Context.CreateResponseResult();
+			Context.Log("Debug", "RequestRaw", result.RequestJson);
+			return GetRawResult(result, false);
+		}
+		
+
+		////////////////////////////////////////////////////////////////////////////////////////////////
+		/*--------------------------------------------------------------------------------------------*/
+		protected virtual string GetRawResult(IResponseResult pResult, bool pParse=true) {
 			IRexConnTcp tcp = pResult.Context.CreateTcpClient();
 
 			int len = IPAddress.HostToNetworkOrder(pResult.RequestJson.Length);
@@ -77,7 +87,6 @@ namespace RexConnectClient.Core {
 			byte[] data = Encoding.ASCII.GetBytes(pResult.RequestJson);
 
 			//stream the request's string length, then the string itself
-
 			NetworkStream stream = tcp.GetStream();
 			stream.Write(dataLen, 0, dataLen.Length);
 			stream.Write(data, 0, data.Length);
@@ -101,7 +110,12 @@ namespace RexConnectClient.Core {
 
 			string resp = sb.ToString();
 			pResult.Context.Log("Debug", "Result", resp);
-			pResult.SetResponseJson(resp);
+
+			if ( pParse ) {
+				pResult.SetResponseJson(resp);
+			}
+
+			return resp;
 		}
 
 	}

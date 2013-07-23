@@ -15,7 +15,7 @@ namespace RexConnectClient.Core.Result {
 		string ResponseJson { get; }
 
 		bool IsError { get; }
-		int ExecutionMilliseconds { get; set; }
+		double ExecutionMilliseconds { get; set; }
 
 
 		////////////////////////////////////////////////////////////////////////////////////////////////

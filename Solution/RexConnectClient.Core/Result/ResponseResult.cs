@@ -18,7 +18,7 @@ namespace RexConnectClient.Core.Result {
 		public string ResponseJson { get; protected set; }
 
 		public bool IsError { get; protected set; }
-		public int ExecutionMilliseconds { get; set; }
+		public double ExecutionMilliseconds { get; set; }
 
 		private IList<IList<IDictionary<string, string>>> vMapResults;
 		private IList<IList<IGraphElement>> vElementResults;
