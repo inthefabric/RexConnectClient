@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Web;
 using RexConnectClient.Core.Result;
 
 namespace RexConnectClient.Core {
@@ -80,6 +82,20 @@ namespace RexConnectClient.Core {
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		/*--------------------------------------------------------------------------------------------*/
 		protected virtual string GetRawResult(IResponseResult pResult, bool pParse=true) {
+			string resp = (pResult.Context.UseHttp ?
+				GetRawResultHttp(pResult) : GetRawResultTcp(pResult));
+
+			pResult.Context.Log("Debug", "Result", resp);
+
+			if ( pParse ) {
+				pResult.SetResponseJson(resp);
+			}
+
+			return resp;
+		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		protected virtual string GetRawResultTcp(IResponseResult pResult) {
 			IRexConnTcp tcp = pResult.Context.CreateTcpClient();
 
 			int len = IPAddress.HostToNetworkOrder(pResult.RequestJson.Length);
@@ -108,14 +124,21 @@ namespace RexConnectClient.Core {
 				sb.Append(Encoding.ASCII.GetString(data, 0, bytes));
 			}
 
-			string resp = sb.ToString();
-			pResult.Context.Log("Debug", "Result", resp);
+			return sb.ToString();
+		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		protected virtual string GetRawResultHttp(IResponseResult pResult) {
+			string url = "http://"+pResult.Context.HostName+":"+pResult.Context.Port+
+				"/graphs/graph/fabric/rexconnect";
+			
+			using ( var wc = new WebClient() ) {
+				var vals = new NameValueCollection();
+				vals["req"] = pResult.RequestJson;
 
-			if ( pParse ) {
-				pResult.SetResponseJson(resp);
+				byte[] bytes = wc.UploadValues(url, "POST", vals);
+				return Encoding.ASCII.GetString(bytes, 0, bytes.Length);
 			}
-
-			return resp;
 		}
 
 	}

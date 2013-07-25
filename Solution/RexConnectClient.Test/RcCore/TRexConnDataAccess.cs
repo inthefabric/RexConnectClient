@@ -27,9 +27,10 @@ namespace RexConnectClient.Test.RcCore {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		/*--------------------------------------------------------------------------------------------*/
-		[Test]
+		[TestCase(true)]
+		[TestCase(false)]
 		[Category(Integration)]
-		public void Execute() {
+		public void Execute(bool pUseHttp) {
 			const string reqId = "1234";
 
 			var r = new Request(reqId);
@@ -41,7 +42,7 @@ namespace RexConnectClient.Test.RcCore {
 			r.AddSessionAction(RexConn.SessionAction.Rollback);
 			r.AddSessionAction(RexConn.SessionAction.Close);
 
-			IResponseResult result = ExecuteRequest(r);
+			IResponseResult result = ExecuteRequest(r, pUseHttp);
 
 			Assert.NotNull(result, "Result should not be null.");
 			Assert.NotNull(result.Response, "Result.Response should not be null.");
@@ -54,17 +55,16 @@ namespace RexConnectClient.Test.RcCore {
 		}
 		
 		/*--------------------------------------------------------------------------------------------*/
-		[Test]
+		[TestCase(true)]
+		[TestCase(false)]
 		[Category(Integration)]
-		public void ExecuteRaw() {
+		public void ExecuteRaw(bool pUseHttp) {
 			const string reqId = "1234";
 
 			var r = new Request(reqId);
 			r.AddQuery("999");
 
-			var ctx = new RexConnContext(r, RexConnHost, RexConnPort);
-			var da = new RexConnDataAccess(ctx);
-			string result = da.ExecuteRaw();
+			string result = BuildDataAccess(r, pUseHttp).ExecuteRaw();
 
 			const string expectPattern = 
 				@"\{""reqId"":""1234"",""timer"":\d+,""cmdList"":\["+
@@ -75,12 +75,13 @@ namespace RexConnectClient.Test.RcCore {
 		}
 		
 		/*--------------------------------------------------------------------------------------------*/
-		[Test]
+		[TestCase(true)]
+		[TestCase(false)]
 		[Category(Integration)]
-		public void ExecuteSessions() {
+		public void ExecuteSessions(bool pUseHttp) {
 			var r = new Request("1");
 			r.AddSessionAction(RexConn.SessionAction.Start);
-			IResponseResult result = ExecuteRequest(r);
+			IResponseResult result = ExecuteRequest(r, pUseHttp);
 			Assert.NotNull(result.Response.SessId, "SessId should be filled.");
 			string sessId = result.Response.SessId;
 
@@ -88,7 +89,7 @@ namespace RexConnectClient.Test.RcCore {
 
 			r = new Request("2", sessId);
 			r.AddQuery("x = 5");
-			result = ExecuteRequest(r);
+			result = ExecuteRequest(r, pUseHttp);
 			Assert.NotNull(result.Response.SessId, "SessId should be filled.");
 			Assert.AreEqual(5, result.GetTextResultsAt(0).ToInt(0));
 
@@ -96,7 +97,7 @@ namespace RexConnectClient.Test.RcCore {
 
 			r = new Request("3", sessId);
 			r.AddQuery("x += 15");
-			result = ExecuteRequest(r);
+			result = ExecuteRequest(r, pUseHttp);
 			Assert.NotNull(result.Response.SessId, "SessId should be filled.");
 			Assert.AreEqual(20, result.GetTextResultsAt(0).ToInt(0));
 
@@ -104,7 +105,7 @@ namespace RexConnectClient.Test.RcCore {
 
 			r = new Request("4", sessId);
 			r.AddQuery("x");
-			result = ExecuteRequest(r);
+			result = ExecuteRequest(r, pUseHttp);
 			Assert.NotNull(result.Response.SessId, "SessId should be filled.");
 			Assert.AreEqual(20, result.GetTextResultsAt(0).ToInt(0));
 
@@ -113,20 +114,21 @@ namespace RexConnectClient.Test.RcCore {
 			r = new Request("5", sessId);
 			r.AddSessionAction(RexConn.SessionAction.Rollback);
 			r.AddSessionAction(RexConn.SessionAction.Close);
-			result = ExecuteRequest(r);
+			result = ExecuteRequest(r, pUseHttp);
 			Assert.Null(result.Response.SessId, "SessId should be null.");
 
 			////
 
 			r = new Request("6");
 			r.AddQuery("x"); //not available outside of session
-			TestUtil.CheckThrows<ResponseErrException>(true, () => ExecuteRequest(r));
+			TestUtil.CheckThrows<ResponseErrException>(true, () => ExecuteRequest(r, pUseHttp));
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
-		[Test]
+		[TestCase(true)]
+		[TestCase(false)]
 		[Category(Integration)]
-		public void ExecuteConditional() {
+		public void ExecuteConditional(bool pUseHttp) {
 			const string reqId = "1234";
 
 			var r = new Request(reqId);
@@ -209,7 +211,7 @@ namespace RexConnectClient.Test.RcCore {
 
 			r.AddSessionAction(RexConn.SessionAction.Close);
 
-			IResponseResult result = ExecuteRequest(r);
+			IResponseResult result = ExecuteRequest(r, pUseHttp);
 
 			Assert.NotNull(result, "Result should not be null.");
 			Assert.NotNull(result.Response, "Result.Response should not be null.");
@@ -241,49 +243,59 @@ namespace RexConnectClient.Test.RcCore {
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
-		[TestCase("x")]
-		[TestCase("^invalid-gremlin/script!")]
+		[TestCase("x", true)]
+		[TestCase("^invalid-gremlin/script!", true)]
+		[TestCase("x", false)]
+		[TestCase("^invalid-gremlin/script!", false)]
 		[Category(Integration)]
-		public void ExecuteErrQuery(string pScript) {
+		public void ExecuteErrQuery(string pScript, bool pUseHttp) {
 			var r = new Request("1234");
 			r.AddQuery(pScript);
-			TestUtil.CheckThrows<ResponseErrException>(true, () => ExecuteRequest(r));
+			TestUtil.CheckThrows<ResponseErrException>(true, () => ExecuteRequest(r, pUseHttp));
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
-		[Test]
+		[TestCase(true)]
+		[TestCase(false)]
 		[Category(Integration)]
-		public void ExecuteErrConfig() {
+		public void ExecuteErrConfig(bool pUseHttp) {
 			var r = new Request("1234");
 			r.AddConfigSetting(RexConn.ConfigSetting.Pretty, "invalid");
-			TestUtil.CheckThrows<ResponseErrException>(true, () => ExecuteRequest(r));
+			TestUtil.CheckThrows<ResponseErrException>(true, () => ExecuteRequest(r, pUseHttp));
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
-		[Test]
+		[TestCase(true)]
+		[TestCase(false)]
 		[Category(Integration)]
-		public void ExecuteErrSession() {
+		public void ExecuteErrSession(bool pUseHttp) {
 			var r = new Request("1234");
 			r.AddSessionAction(RexConn.SessionAction.Close);
-			TestUtil.CheckThrows<ResponseErrException>(true, () => ExecuteRequest(r));
+			TestUtil.CheckThrows<ResponseErrException>(true, () => ExecuteRequest(r, pUseHttp));
 		}
 
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		/*--------------------------------------------------------------------------------------------*/
-		[TestCase(1)]
-		[TestCase(2)]
-		[TestCase(5)]
-		[TestCase(10)]
-		[TestCase(100)]
-		//[TestCase(1000)]
+		[TestCase(1, true)]
+		[TestCase(2, true)]
+		[TestCase(5, true)]
+		[TestCase(10, true)]
+		[TestCase(100, true)]
+		//[TestCase(1000, true)]
+		[TestCase(1, false)]
+		[TestCase(2, false)]
+		[TestCase(5, false)]
+		[TestCase(10, false)]
+		[TestCase(100, false)]
+		//[TestCase(1000, false)]
 		[Category(Integration)]
-		public void ExecuteTiming(int pQueryCount) {
+		public void ExecuteTiming(int pQueryCount, bool pUseHttp) {
 			var r = new Request("x");
 			r.AddSessionAction(RexConn.SessionAction.Start);
 			r.AddQuery("g");
 			r.AddSessionAction(RexConn.SessionAction.Close);
-			ExecuteRequest(r);
+			ExecuteRequest(r, pUseHttp);
 
 			// Execute separate requests
 			
@@ -292,7 +304,7 @@ namespace RexConnectClient.Test.RcCore {
 
 			r = new Request("x");
 			r.AddSessionAction(RexConn.SessionAction.Start);
-			IResponseResult result = ExecuteRequest(r);
+			IResponseResult result = ExecuteRequest(r, pUseHttp);
 			reqTime += result.Response.Timer;
 
 			string sessId = result.Response.SessId;
@@ -300,13 +312,13 @@ namespace RexConnectClient.Test.RcCore {
 			for ( int i = 0 ; i < pQueryCount ; ++i ) {
 				r = new Request("x", sessId);
 				r.AddQuery("g");
-				result = ExecuteRequest(r);
+				result = ExecuteRequest(r, pUseHttp);
 				reqTime += result.Response.Timer;
 			}
 
 			r = new Request("x", sessId);
 			r.AddSessionAction(RexConn.SessionAction.Close);
-			result = ExecuteRequest(r);
+			result = ExecuteRequest(r, pUseHttp);
 			reqTime += result.Response.Timer;
 
 			sw.Stop();
@@ -324,7 +336,7 @@ namespace RexConnectClient.Test.RcCore {
 			}
 
 			r.AddSessionAction(RexConn.SessionAction.Close);
-			result = ExecuteRequest(r);
+			result = ExecuteRequest(r, pUseHttp);
 			reqTime2 += result.Response.Timer;
 
 			sw2.Stop();
@@ -346,10 +358,15 @@ namespace RexConnectClient.Test.RcCore {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		/*--------------------------------------------------------------------------------------------*/
-		private IResponseResult ExecuteRequest(Request pReq) {
-			var ctx = new RexConnContext(pReq, RexConnHost, RexConnPort);
-			var da = new RexConnDataAccess(ctx);
-			return da.Execute();
+		private RexConnDataAccess BuildDataAccess(Request pReq, bool pUseHttp) {
+			var ctx = new RexConnContext(pReq, RexConnHost, (pUseHttp ? 8182 : RexConnPort));
+			ctx.UseHttp = pUseHttp;
+			return new RexConnDataAccess(ctx);
+		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		private IResponseResult ExecuteRequest(Request pReq, bool pUseHttp) {
+			return BuildDataAccess(pReq, pUseHttp).Execute();
 		}
 
 	}
