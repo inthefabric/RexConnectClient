@@ -282,13 +282,13 @@ namespace RexConnectClient.Test.RcCore {
 		[TestCase(5, true)]
 		[TestCase(10, true)]
 		[TestCase(100, true)]
-		//[TestCase(1000, true)]
+		[TestCase(1000, true)]
 		[TestCase(1, false)]
 		[TestCase(2, false)]
 		[TestCase(5, false)]
 		[TestCase(10, false)]
 		[TestCase(100, false)]
-		//[TestCase(1000, false)]
+		[TestCase(1000, false)]
 		[Category(Integration)]
 		public void ExecuteTiming(int pQueryCount, bool pUseHttp) {
 			var r = new Request("x");
@@ -361,6 +361,7 @@ namespace RexConnectClient.Test.RcCore {
 		private RexConnDataAccess BuildDataAccess(Request pReq, bool pUseHttp) {
 			var ctx = new RexConnContext(pReq, RexConnHost, (pUseHttp ? 8182 : RexConnPort));
 			ctx.UseHttp = pUseHttp;
+			ctx.Logger = (level, category, text, ex) => {};
 			return new RexConnDataAccess(ctx);
 		}
 		

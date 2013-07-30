@@ -5,7 +5,6 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Web;
 using RexConnectClient.Core.Result;
 
 namespace RexConnectClient.Core {
@@ -93,16 +92,17 @@ namespace RexConnectClient.Core {
 
 			return resp;
 		}
-		
+
 		/*--------------------------------------------------------------------------------------------*/
 		protected virtual string GetRawResultTcp(IResponseResult pResult) {
 			IRexConnTcp tcp = pResult.Context.CreateTcpClient();
 
 			int len = IPAddress.HostToNetworkOrder(pResult.RequestJson.Length);
 			byte[] dataLen = BitConverter.GetBytes(len);
-			byte[] data = Encoding.ASCII.GetBytes(pResult.RequestJson);
+			byte[] data = Encoding.UTF8.GetBytes(pResult.RequestJson);
 
 			//stream the request's string length, then the string itself
+
 			NetworkStream stream = tcp.GetStream();
 			stream.Write(dataLen, 0, dataLen.Length);
 			stream.Write(data, 0, data.Length);
@@ -115,16 +115,10 @@ namespace RexConnectClient.Core {
 			int respLen = BitConverter.ToInt32(data, 0);
 
 			//Get response string using the string length
-
-			var sb = new StringBuilder(respLen);
-
-			while ( sb.Length < respLen ) {
-				data = new byte[respLen];
-				int bytes = stream.Read(data, 0, data.Length);
-				sb.Append(Encoding.ASCII.GetString(data, 0, bytes));
-			}
-
-			return sb.ToString();
+			
+			var buf = new char[respLen];
+			new StreamReader(stream).Read(buf, 0, respLen);
+			return new string(buf);
 		}
 		
 		/*--------------------------------------------------------------------------------------------*/
