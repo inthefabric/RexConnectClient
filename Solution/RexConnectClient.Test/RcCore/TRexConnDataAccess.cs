@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Moq;
@@ -242,6 +243,37 @@ namespace RexConnectClient.Test.RcCore {
 			Console.WriteLine("TIME: "+result.Response.Timer+"ms");
 		}
 
+
+		////////////////////////////////////////////////////////////////////////////////////////////////
+		/*--------------------------------------------------------------------------------------------*/
+		[TestCase(200, false)]
+		[TestCase(200, true)]
+		[Category(Integration)]
+		public void ExecuteMany(int pQueryCount, bool pUseHttp) {
+			var r = new Request("x");
+
+			for ( int i = 0 ; i < pQueryCount ; ++i ) {
+				r.AddQuery("[val:"+i+"]");
+			}
+
+			Console.WriteLine("Execute...");
+			IResponseResult result = ExecuteRequest(r, pUseHttp);
+
+			Console.WriteLine("GetTextResults...");
+			IList<ITextResultList> trList = result.GetTextResults();
+			Assert.AreEqual(pQueryCount, trList.Count, "Incorrect GetTextResults() count.");
+
+			Console.WriteLine("GetMapResults...");
+			IList<IList<IDictionary<string, string>>> mapList = result.GetMapResults();
+			Assert.AreEqual(pQueryCount, mapList.Count, "Incorrect GetMapResults() count.");
+
+			for ( int i = 0 ; i < pQueryCount ; ++i ) {
+				Assert.AreEqual("{val:"+i+"}", trList[i].ToString(0),
+					"Incorrect text result at "+i+".");
+				Assert.AreEqual(i+"", mapList[i][0]["val"], "Incorrect map result at "+i+".");
+			}
+		}
+
 		/*--------------------------------------------------------------------------------------------*/
 		[TestCase("x", true)]
 		[TestCase("^invalid-gremlin/script!", true)]
@@ -282,13 +314,11 @@ namespace RexConnectClient.Test.RcCore {
 		[TestCase(5, true)]
 		[TestCase(10, true)]
 		[TestCase(100, true)]
-		[TestCase(1000, true)]
 		[TestCase(1, false)]
 		[TestCase(2, false)]
 		[TestCase(5, false)]
 		[TestCase(10, false)]
 		[TestCase(100, false)]
-		[TestCase(1000, false)]
 		[Category(Integration)]
 		public void ExecuteTiming(int pQueryCount, bool pUseHttp) {
 			var r = new Request("x");
@@ -340,6 +370,9 @@ namespace RexConnectClient.Test.RcCore {
 			reqTime2 += result.Response.Timer;
 
 			sw2.Stop();
+
+			IList<ITextResultList> trList = result.GetTextResults();
+			Assert.AreEqual(pQueryCount+2, trList.Count, "Incorrect query result count.");
 			
 			// Report results
 
@@ -360,7 +393,7 @@ namespace RexConnectClient.Test.RcCore {
 		/*--------------------------------------------------------------------------------------------*/
 		private RexConnDataAccess BuildDataAccess(Request pReq, bool pUseHttp) {
 			var ctx = new RexConnContext(pReq, RexConnHost, (pUseHttp ? 8182 : RexConnPort));
-			ctx.UseHttp = pUseHttp;
+			ctx.SetHttpMode(pUseHttp, "graph");
 			ctx.Logger = (level, category, text, ex) => {};
 			return new RexConnDataAccess(ctx);
 		}

@@ -10,7 +10,8 @@ namespace RexConnectClient.Core {
 		Request Request { get; }
 		string HostName { get; }
 		int Port { get; }
-		bool UseHttp { get; set; }
+		bool UseHttp { get; }
+		string GraphName { get; }
 		RexConnContext.LogFunc Logger { get; set; }
 
 

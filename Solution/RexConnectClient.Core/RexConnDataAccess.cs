@@ -115,16 +115,22 @@ namespace RexConnectClient.Core {
 			int respLen = BitConverter.ToInt32(data, 0);
 
 			//Get response string using the string length
-			
-			var buf = new char[respLen];
-			new StreamReader(stream).Read(buf, 0, respLen);
-			return new string(buf);
+
+			var sb = new StringBuilder(respLen);
+
+			while ( sb.Length < respLen ) {
+				data = new byte[respLen];
+				int bytes = stream.Read(data, 0, data.Length);
+				sb.Append(Encoding.UTF8.GetString(data, 0, bytes));
+			}
+
+			return sb.ToString();
 		}
 		
 		/*--------------------------------------------------------------------------------------------*/
 		protected virtual string GetRawResultHttp(IResponseResult pResult) {
 			string url = "http://"+pResult.Context.HostName+":"+pResult.Context.Port+
-				"/graphs/graph/fabric/rexconnect";
+				"/graphs/"+pResult.Context.GraphName+"/fabric/rexconnect";
 			
 			using ( var wc = new WebClient() ) {
 				var vals = new NameValueCollection();

@@ -10,7 +10,8 @@ namespace RexConnectClient.Core {
 		public Request Request { get; private set; }
 		public string HostName { get; private set; }
 		public int Port { get; private set; }
-		public bool UseHttp { get; set; }
+		public bool UseHttp { get; private set; }
+		public string GraphName { get; private set; }
 		public LogFunc Logger { get; set; }
 
 
@@ -37,6 +38,13 @@ namespace RexConnectClient.Core {
 			tcp.SendBufferSize = tcp.ReceiveBufferSize = 1<<16;
 			return tcp;
 		}
+
+		/*--------------------------------------------------------------------------------------------*/
+		public virtual void SetHttpMode(bool pUseHttp, string pGraphName) {
+			UseHttp = pUseHttp;
+			GraphName = pGraphName;
+		}
+
 
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
