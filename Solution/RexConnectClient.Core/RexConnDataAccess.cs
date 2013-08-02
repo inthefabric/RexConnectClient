@@ -116,15 +116,18 @@ namespace RexConnectClient.Core {
 
 			//Get response string using the string length
 
-			var sb = new StringBuilder(respLen);
+			data = new byte[respLen];
+			int currLen = 0;
 
-			while ( sb.Length < respLen ) {
-				data = new byte[respLen];
-				int bytes = stream.Read(data, 0, data.Length);
-				sb.Append(Encoding.UTF8.GetString(data, 0, bytes));
+			while ( currLen < respLen ) {
+				currLen += stream.Read(data, currLen, respLen-currLen);
 			}
 
-			return sb.ToString();
+			stream.Close();
+			stream.Dispose();
+			tcp.Close();
+
+			return Encoding.UTF8.GetString(data, 0, respLen);
 		}
 		
 		/*--------------------------------------------------------------------------------------------*/

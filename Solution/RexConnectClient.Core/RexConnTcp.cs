@@ -31,6 +31,11 @@ namespace RexConnectClient.Core {
 			return vTcpClient.GetStream();
 		}
 
+		/*--------------------------------------------------------------------------------------------*/
+		public void Close() {
+			vTcpClient.Close();
+		}
+
 	}
 
 }

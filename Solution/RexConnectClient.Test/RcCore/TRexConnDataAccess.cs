@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using Moq;
 using NUnit.Framework;
 using RexConnectClient.Core;
@@ -386,6 +387,40 @@ namespace RexConnectClient.Test.RcCore {
 				(sw.Elapsed.TotalMilliseconds/sw2.Elapsed.TotalMilliseconds).ToString("###.0")+
 				"x (total), "+(reqTime/(double)reqTime2).ToString("###.0")+"x (RexConnect)"
 			);
+		}
+
+		/*--------------------------------------------------------------------------------------------*/
+		[TestCase(true)]
+		[TestCase(false)]
+		[Category(Integration)]
+		public void ExecuteSeveralRequests(bool pUseHttp) {
+			var r = new Request("x");
+			r.AddQuery("1+1");
+			ExecuteRequest(r, pUseHttp);
+			ExecuteRequest(r, pUseHttp);
+			ExecuteRequest(r, pUseHttp);
+			ExecuteRequest(r, pUseHttp);
+			ExecuteRequest(r, pUseHttp);
+
+			for ( int x = 0 ; x < 10 ; ++x ) {
+				const int count = 1000;
+
+				var sw = Stopwatch.StartNew();
+				long reqTime = 0;
+
+				for ( int i = 0 ; i < count ; ++i ) {
+					reqTime += ExecuteRequest(r, pUseHttp).Response.Timer;
+				}
+
+				TimeSpan ts = sw.Elapsed;
+				sw.Stop();
+
+				Console.WriteLine("Avg: "+(ts.TotalMilliseconds/count)+"ms total, "+
+					(reqTime/(double)count)+"ms RexConnect / Latency: "+
+					((ts.TotalMilliseconds-reqTime)/count)+"ms");
+
+				Thread.Sleep(100);
+			}
 		}
 
 
