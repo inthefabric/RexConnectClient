@@ -52,6 +52,18 @@ namespace RexConnectClient.Test.RcCore.Result {
 
 		/*--------------------------------------------------------------------------------------------*/
 		[Test]
+		public void BuildNoType() {
+			var jo = new JsonObject();
+			jo.Add("_id", "4321");
+
+			var ge = GraphElement.Build(jo);
+
+			Assert.AreEqual("4321", ge.Id, "Incorrect Id.");
+			Assert.AreEqual(RexConn.GraphElementType.Unspecified, ge.Type, "Incorrect Type.");
+		}
+
+		/*--------------------------------------------------------------------------------------------*/
+		[Test]
 		public void BuildNoId() {
 			var jo = new JsonObject();
 			jo.Add("_type", "vertex");
@@ -63,9 +75,12 @@ namespace RexConnectClient.Test.RcCore.Result {
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
-		[Test]
-		public void BuildError() {
+		[TestCase("bad")]
+		[TestCase("vertexx")]
+		[TestCase("")]
+		public void BuildInvalidType(string pType) {
 			var jo = new JsonObject();
+			jo.Add("_type", pType);
 			TestUtil.CheckThrows<Exception>(true, () => GraphElement.Build(jo));
 		}
 

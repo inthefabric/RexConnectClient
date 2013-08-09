@@ -402,8 +402,8 @@ namespace RexConnectClient.Test.RcCore {
 			ExecuteRequest(r, pUseHttp);
 			ExecuteRequest(r, pUseHttp);
 
-			for ( int x = 0 ; x < 10 ; ++x ) {
-				const int count = 1000;
+			for ( int x = 0 ; x < 5 ; ++x ) {
+				const int count = 400;
 
 				var sw = Stopwatch.StartNew();
 				long reqTime = 0;

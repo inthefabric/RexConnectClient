@@ -33,6 +33,10 @@ namespace RexConnectClient.Core.Result {
 					ge.InVertexId = pObj["_inV"];
 					break;
 
+				case null:
+					ge.Type = RexConn.GraphElementType.Unspecified;
+					break;
+
 				default:
 					throw new Exception("Unknown GraphElementType: "+pObj["_type"]);
 			}

@@ -22,6 +22,7 @@
 		}
 
 		public enum GraphElementType {
+			Unspecified = -1,
 			Vertex = 1,
 			Edge
 		}
