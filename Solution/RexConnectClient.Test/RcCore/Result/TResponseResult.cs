@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using Moq;
 using NUnit.Framework;
@@ -78,26 +77,26 @@ namespace RexConnectClient.Test.RcCore.Result {
 
 			vMapResultJson =
 				@"{
-					'reqId':'MyReqId',
-					'cmdList':[
-						{'results':{'MyInt':123456, 'MyLong':1234567890123456, 'MyStr':'testing'}},
-						{'results':[{'MyByte':2, 'MyFloat':987.654},{'MyStr':'second map'}]},
-						{'results':[{'MyBool1':true},{'MyBool2':false},{},{'MyBool3':true}]},
-						{'results':{}},
-						{'results':null},
+					'i':'MyReqId',
+					'c':[
+						{'r':{'MyInt':123456, 'MyLong':1234567890123456, 'MyStr':'testing'}},
+						{'r':[{'MyByte':2, 'MyFloat':987.654},{'MyStr':'second map'}]},
+						{'r':[{'MyBool1':true},{'MyBool2':false},{},{'MyBool3':true}]},
+						{'r':{}},
+						{'r':null},
 						{}
 					]
 				}";
 
 			vTextResultJson =
 				@"{
-					'reqId':'MyReqId',
-					'cmdList':[
-						{'results':[123456, 1234567890123456, 'testing']},
-						{'results':[2, 987.654]},
-						{'results':[true]},
-						{'results':[]},
-						{'results':null},
+					'i':'MyReqId',
+					'c':[
+						{'r':[123456, 1234567890123456, 'testing']},
+						{'r':[2, 987.654]},
+						{'r':[true]},
+						{'r':[]},
+						{'r':null},
 						{}
 					]
 				}";
@@ -131,7 +130,7 @@ namespace RexConnectClient.Test.RcCore.Result {
 		[Test]
 		public void SetResponseJson() {
 			const string reqId = "test123";
-			const string json = "{\"reqId\":\""+reqId+"\",\"cmdList\":[{},{\"err\":\"bad!\"}]}";
+			const string json = "{\"i\":\""+reqId+"\",\"c\":[{},{\"e\":\"bad!\"}]}";
 
 			vResult.SetResponseJson(json);
 
@@ -156,7 +155,7 @@ namespace RexConnectClient.Test.RcCore.Result {
 		[Test]
 		public void SetResponseJsonError() {
 			const string err = "something went horribly askew";
-			const string json = "{\"reqId\":\"test\",\"err\":\""+err+"\"}";
+			const string json = "{\"i\":\"test\",\"e\":\""+err+"\"}";
 
 			Exception e = TestUtil.CheckThrows<ResponseErrException>(
 				true, () => vResult.SetResponseJson(json));

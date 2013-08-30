@@ -103,7 +103,7 @@ namespace RexConnectClient.Test.RcCore.Transfer {
 		/*--------------------------------------------------------------------------------------------*/
 		[Test]
 		public void ToRequestJson() {
-			const string expect = "{\"reqId\":\"testing\",\"cmdList\":[]}";
+			const string expect = "{\"i\":\"testing\",\"c\":[]}";
 			var r = new Request("testing");
 			Assert.AreEqual(expect, r.ToRequestJson(), "Incorrect result.");
 		}

@@ -69,8 +69,8 @@ namespace RexConnectClient.Test.RcCore {
 			string result = BuildDataAccess(r, pUseHttp).ExecuteRaw();
 
 			const string expectPattern = 
-				@"\{""reqId"":""1234"",""timer"":\d+,""cmdList"":\["+
-					@"\{""timer"":\d+,""results"":\[999\]\}"+
+				@"\{""i"":""1234"",""t"":\d+,""c"":\["+
+					@"\{""t"":\d+,""r"":\[999\]\}"+
 				@"\]\}";
 
 			StringAssert.IsMatch(expectPattern, result, "Incorrect result: "+result);
@@ -336,7 +336,7 @@ namespace RexConnectClient.Test.RcCore {
 			r = new Request("x");
 			r.AddSessionAction(RexConn.SessionAction.Start);
 			IResponseResult result = ExecuteRequest(r, pUseHttp);
-			reqTime += result.Response.Timer;
+			reqTime += (long)result.Response.Timer;
 
 			string sessId = result.Response.SessId;
 
@@ -344,13 +344,13 @@ namespace RexConnectClient.Test.RcCore {
 				r = new Request("x", sessId);
 				r.AddQuery("g");
 				result = ExecuteRequest(r, pUseHttp);
-				reqTime += result.Response.Timer;
+				reqTime += (long)result.Response.Timer;
 			}
 
 			r = new Request("x", sessId);
 			r.AddSessionAction(RexConn.SessionAction.Close);
 			result = ExecuteRequest(r, pUseHttp);
-			reqTime += result.Response.Timer;
+			reqTime += (long)result.Response.Timer;
 
 			sw.Stop();
 
@@ -368,7 +368,7 @@ namespace RexConnectClient.Test.RcCore {
 
 			r.AddSessionAction(RexConn.SessionAction.Close);
 			result = ExecuteRequest(r, pUseHttp);
-			reqTime2 += result.Response.Timer;
+			reqTime2 += (long)result.Response.Timer;
 
 			sw2.Stop();
 
@@ -409,7 +409,7 @@ namespace RexConnectClient.Test.RcCore {
 				long reqTime = 0;
 
 				for ( int i = 0 ; i < count ; ++i ) {
-					reqTime += ExecuteRequest(r, pUseHttp).Response.Timer;
+					reqTime += (long)ExecuteRequest(r, pUseHttp).Response.Timer;
 				}
 
 				TimeSpan ts = sw.Elapsed;

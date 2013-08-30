@@ -1,14 +1,31 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace RexConnectClient.Core.Transfer {
 
 	/*================================================================================================*/
+	[DataContract]
 	public class RequestCmd {
 
+		public enum Option {
+			OmitTimer = 1,
+			OmitResults = 2
+		}
+
+		[DataMember(Name="i")]
 		public string CmdId { get; set; }
+
+		[DataMember(Name="o")]
+		public byte? Opt { get; set; }
+
+		[DataMember(Name="e")]
 		public IList<string> Cond { get; set; }
+
+		[DataMember(Name="c")]
 		public string Cmd { get; set; }
+
+		[DataMember(Name="a")]
 		public IList<string> Args { get; set; }
 
 
@@ -29,6 +46,11 @@ namespace RexConnectClient.Core.Transfer {
 			}
 
 			Cond.Add(pCommandId);
+		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		public void SetOption(Option pOption) {
+			Opt = (byte)(Opt | (byte)pOption);
 		}
 
 
