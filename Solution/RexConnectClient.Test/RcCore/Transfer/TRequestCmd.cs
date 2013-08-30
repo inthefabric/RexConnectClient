@@ -15,6 +15,7 @@ namespace RexConnectClient.Test.RcCore.Transfer {
 			var rc = new RequestCmd();
 
 			Assert.Null(rc.CmdId, "CmdId should be null.");
+			Assert.Null(rc.Opt, "Opt should be null.");
 			Assert.Null(rc.Cond, "Cond should be null.");
 			Assert.Null(rc.Cmd, "Cmd should be null.");
 			Assert.Null(rc.Args, "Args should be null.");
@@ -66,7 +67,21 @@ namespace RexConnectClient.Test.RcCore.Transfer {
 			Assert.AreEqual("b1", rc.Cond[1], "Cond[1] is incorrect.");
 			Assert.AreEqual("c2", rc.Cond[2], "Cond[2] is incorrect.");
 		}
-		
+
+		/*--------------------------------------------------------------------------------------------*/
+		[TestCase(new[] { RequestCmd.Option.OmitTimer }, 1)]
+		[TestCase(new[] { RequestCmd.Option.OmitResults }, 2)]
+		[TestCase(new[] { RequestCmd.Option.OmitTimer, RequestCmd.Option.OmitResults }, 3)]
+		public void EnableOption(RequestCmd.Option[] pOptions, byte pExpectOpt) {
+			var rc = new RequestCmd();
+
+			foreach ( RequestCmd.Option o in pOptions ) {
+				rc.EnableOption(o);
+			}
+
+			Assert.AreEqual(pExpectOpt, rc.Opt, "Incorrect Opt.");
+		}
+
 	}
 
 }

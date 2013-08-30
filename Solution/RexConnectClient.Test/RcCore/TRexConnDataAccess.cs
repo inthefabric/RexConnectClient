@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
@@ -242,6 +241,68 @@ namespace RexConnectClient.Test.RcCore {
 			}
 
 			Console.WriteLine("TIME: "+result.Response.Timer+"ms");
+		}
+
+		/*--------------------------------------------------------------------------------------------*/
+		[TestCase(true)]
+		[TestCase(false)]
+		[Category(Integration)]
+		public void ExecuteRequestOptions(bool pUseHttp) {
+			var r = new Request();
+			r.EnableOption(Request.Option.OmitTimer);
+			r.AddQuery("1");
+
+			IResponseResult result = ExecuteRequest(r, pUseHttp);
+
+			Assert.NotNull(result, "Result should not be null.");
+			Assert.NotNull(result.Response, "Result.Response should not be null.");
+			Assert.NotNull(result.ResponseJson, "Result.ResponseJson should not be null.");
+
+			Assert.False(result.IsError, "Incorrect IsError.");
+			Assert.AreEqual(1, result.Response.CmdList.Count, "Incorrect Response.CmdList.Count.");
+
+			Assert.Null(result.Response.Timer, "Timer should be null.");
+		}
+
+		/*--------------------------------------------------------------------------------------------*/
+		[TestCase(true)]
+		[TestCase(false)]
+		[Category(Integration)]
+		public void ExecuteCommandOptions(bool pUseHttp) {
+			var r = new Request();
+
+			RequestCmd c = r.AddQuery("1");
+			c.EnableOption(RequestCmd.Option.OmitTimer);
+
+			c = r.AddQuery("1");
+			c.EnableOption(RequestCmd.Option.OmitResults);
+
+			c = r.AddQuery("1");
+			c.EnableOption(RequestCmd.Option.OmitTimer);
+			c.EnableOption(RequestCmd.Option.OmitResults);
+
+			IResponseResult result = ExecuteRequest(r, pUseHttp);
+
+			Assert.NotNull(result, "Result should not be null.");
+			Assert.NotNull(result.Response, "Result.Response should not be null.");
+			Assert.NotNull(result.ResponseJson, "Result.ResponseJson should not be null.");
+
+			Assert.False(result.IsError, "Incorrect IsError.");
+			Assert.AreEqual(3, result.Response.CmdList.Count, "Incorrect Response.CmdList.Count.");
+
+			IList<ResponseCmd> cmdList = result.Response.CmdList;
+			ResponseCmd cmd0 = cmdList[0];
+			ResponseCmd cmd1 = cmdList[1];
+			ResponseCmd cmd2 = cmdList[2];
+
+			Assert.Null(cmd0.Timer, "Incorrect Cmd[0].Timer.");
+			Assert.NotNull(cmd0.Results, "Incorrect Cmd[0].Results.");
+
+			Assert.NotNull(cmd1.Timer, "Incorrect Cmd[1].Timer.");
+			Assert.Null(cmd1.Results, "Incorrect Cmd[1].Results.");
+
+			Assert.Null(cmd2.Timer, "Incorrect Cmd[2].Timer.");
+			Assert.Null(cmd2.Results, "Incorrect Cmd[2].Results.");
 		}
 
 

@@ -49,7 +49,11 @@ namespace RexConnectClient.Core.Transfer {
 		}
 		
 		/*--------------------------------------------------------------------------------------------*/
-		public void SetOption(Option pOption) {
+		public void EnableOption(Option pOption) {
+			if ( Opt == null ) {
+				Opt = 0;
+			}
+
 			Opt = (byte)(Opt | (byte)pOption);
 		}
 

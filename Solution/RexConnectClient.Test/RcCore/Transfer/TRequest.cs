@@ -18,6 +18,7 @@ namespace RexConnectClient.Test.RcCore.Transfer {
 
 			Assert.Null(r.ReqId, "ReqId should be null.");
 			Assert.Null(r.SessId, "SessId should be null.");
+			Assert.Null(r.Opt, "Opt should be null.");
 			AssertCmdList(r, 0);
 		}
 		
@@ -96,6 +97,18 @@ namespace RexConnectClient.Test.RcCore.Transfer {
 
 			AssertCmdList(r, 1);
 			AssertCmd(cmd, "config", "debug","1");
+		}
+
+		/*--------------------------------------------------------------------------------------------*/
+		[TestCase(new[] { Request.Option.OmitTimer }, 1)]
+		public void EnableOption(RequestCmd.Option[] pOptions, byte pExpectOpt) {
+			var r = new Request();
+
+			foreach ( Request.Option o in pOptions ) {
+				r.EnableOption(o);
+			}
+
+			Assert.AreEqual(pExpectOpt, r.Opt, "Incorrect Opt.");
 		}
 
 
