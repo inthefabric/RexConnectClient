@@ -69,17 +69,21 @@ namespace RexConnectClient.Test.RcCore.Transfer {
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
-		[TestCase(new[] { RequestCmd.Option.OmitTimer }, 1)]
-		[TestCase(new[] { RequestCmd.Option.OmitResults }, 2)]
-		[TestCase(new[] { RequestCmd.Option.OmitTimer, RequestCmd.Option.OmitResults }, 3)]
-		public void EnableOption(RequestCmd.Option[] pOptions, byte pExpectOpt) {
+		[TestCase(RequestCmd.Option.OmitTimer, 1)]
+		[TestCase(RequestCmd.Option.OmitResults, 2)]
+		public void EnableOption(RequestCmd.Option pOption, byte pExpectOpt) {
 			var rc = new RequestCmd();
-
-			foreach ( RequestCmd.Option o in pOptions ) {
-				rc.EnableOption(o);
-			}
-
+			rc.EnableOption(pOption);
 			Assert.AreEqual(pExpectOpt, rc.Opt, "Incorrect Opt.");
+		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		[Test]
+		public void EnableOption() {
+			var rc = new RequestCmd();
+			rc.EnableOption(RequestCmd.Option.OmitTimer);
+			rc.EnableOption(RequestCmd.Option.OmitResults);
+			Assert.AreEqual(3, rc.Opt, "Incorrect Opt.");
 		}
 
 	}

@@ -136,7 +136,7 @@ namespace RexConnectClient.Test.RcCore {
 			//r.AddConfigSetting(RexConn.ConfigSetting.Debug, "1");
 			r.AddSessionAction(RexConn.SessionAction.Start);
 
-			RequestCmd none = r.AddQuery("");
+			RequestCmd none = r.AddQuery(" ");
 			RequestCmd zero = r.AddQuery("0");
 			RequestCmd nul = r.AddQuery("null");
 			RequestCmd fals = r.AddQuery("false");

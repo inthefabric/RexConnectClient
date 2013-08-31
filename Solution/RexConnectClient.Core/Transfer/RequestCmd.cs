@@ -60,28 +60,31 @@ namespace RexConnectClient.Core.Transfer {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		/*--------------------------------------------------------------------------------------------*/
-		internal static RequestCmd CreateQuery(string pScript, bool pCacheScript=false) {
-			string q = JsonUnquote(pScript);
-			string c = (pCacheScript ? "1" : null);
-			return new RequestCmd(RexConn.Command.Query.ToString().ToLower(), q, null, c);
-		}
-
-		/*--------------------------------------------------------------------------------------------*/
-		internal static RequestCmd CreateQuery(string pScript, IDictionary<string, string> pParams, 
+		internal static RequestCmd CreateQuery(string pScript, IDictionary<string, string> pParams=null, 
 																			bool pCacheScript=false) {
-			string q = JsonUnquote(pScript);
-			string c = (pCacheScript ? "1" : null);
-			var sb = new StringBuilder();
-
-			foreach ( string key in pParams.Keys ) {
-				sb.Append(
-					(sb.Length > 0 ? "," : "")+
-					"\""+JsonUnquote(key)+"\":"+
-					"\""+JsonUnquote(pParams[key])+"\""
-				);
+			int argN = (pCacheScript ? 3 : (pParams == null ? 1 : 2));
+			var args = new string[argN];
+			args[0] = JsonUnquote(pScript);
+			
+			if ( pParams != null ) {
+				var sb = new StringBuilder();
+	
+				foreach ( string key in pParams.Keys ) {
+					sb.Append(
+						(sb.Length > 0 ? "," : "")+
+						"\""+JsonUnquote(key)+"\":"+
+						"\""+JsonUnquote(pParams[key])+"\""
+					);
+				}
+				
+				args[1] = "{"+sb+"}";
+			}
+			
+			if ( pCacheScript ) {
+				args[2] = "1";
 			}
 
-			return new RequestCmd(RexConn.Command.Query.ToString().ToLower(), q, "{"+sb+"}", c);
+			return new RequestCmd(RexConn.Command.Query.ToString().ToLower(), args);
 		}
 
 		/*--------------------------------------------------------------------------------------------*/

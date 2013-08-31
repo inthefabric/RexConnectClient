@@ -100,14 +100,10 @@ namespace RexConnectClient.Test.RcCore.Transfer {
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
-		[TestCase(new[] { Request.Option.OmitTimer }, 1)]
-		public void EnableOption(RequestCmd.Option[] pOptions, byte pExpectOpt) {
+		[TestCase(Request.Option.OmitTimer, 1)]
+		public void EnableOption(Request.Option pOption, byte pExpectOpt) {
 			var r = new Request();
-
-			foreach ( Request.Option o in pOptions ) {
-				r.EnableOption(o);
-			}
-
+			r.EnableOption(pOption);
 			Assert.AreEqual(pExpectOpt, r.Opt, "Incorrect Opt.");
 		}
 
