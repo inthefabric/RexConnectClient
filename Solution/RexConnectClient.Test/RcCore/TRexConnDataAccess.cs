@@ -304,6 +304,39 @@ namespace RexConnectClient.Test.RcCore {
 			Assert.Null(cmd2.Timer, "Incorrect Cmd[2].Timer.");
 			Assert.Null(cmd2.Results, "Incorrect Cmd[2].Results.");
 		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		[TestCase(true)]
+		[TestCase(false)]
+		[Category(Integration)]
+		public void ExecuteCache(bool pUseHttp) {
+			string script1 = "x='"+Guid.NewGuid().ToString()+"'";
+			string script2 = "y='"+Guid.NewGuid().ToString()+"'";
+			
+			var r = new Request();
+			r.AddQuery(script1, null, true);
+			r.AddQuery(script2, null, true);
+			r.AddQuery(script1, null, true);
+			r.AddQuery(script1);
+			
+			IResponseResult result = ExecuteRequest(r, pUseHttp);
+			
+			Assert.NotNull(result, "Result should not be null.");
+			Assert.NotNull(result.Response, "Result.Response should not be null.");
+			Assert.NotNull(result.ResponseJson, "Result.ResponseJson should not be null.");
+			
+			Assert.False(result.IsError, "Incorrect IsError.");
+			Assert.AreEqual(4, result.Response.CmdList.Count, "Incorrect Response.CmdList.Count.");
+			
+			ResponseCmd rc0 = result.Response.CmdList[0];
+			ResponseCmd rc1 = result.Response.CmdList[1];
+			ResponseCmd rc2 = result.Response.CmdList[2];
+			ResponseCmd rc3 = result.Response.CmdList[3];
+			
+			Assert.AreEqual(rc0.CacheKey, rc2.CacheKey, "Cmd 0 and 2 keys should be the same.");
+			Assert.AreEqual(rc0.CacheKey+1, rc1.CacheKey, "Cmd 0 and 1 keys should be sequential.");
+			Assert.Null(rc3.CacheKey, "Cmd 3 key should be null.");
+		}
 
 
 		////////////////////////////////////////////////////////////////////////////////////////////////

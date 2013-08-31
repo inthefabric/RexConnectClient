@@ -48,20 +48,28 @@ namespace RexConnectClient.Test.RcCore.Transfer {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		/*--------------------------------------------------------------------------------------------*/
-		[Test]
-		public void AddQuery() {
+		[TestCase(false)]
+		[TestCase(true)]
+		public void AddQuery(bool pCacheScript) {
 			const string script = "testScript";
 			var r = new Request();
 
-			RequestCmd cmd = r.AddQuery(script);
+			RequestCmd cmd = r.AddQuery(script, null, pCacheScript);
 
 			AssertCmdList(r, 1);
-			AssertCmd(cmd, "query", script);
+			
+			if ( pCacheScript ) {
+				AssertCmd(cmd, "query", script, null, "1");
+			}
+			else {
+				AssertCmd(cmd, "query", script);
+			}
 		}
 		
 		/*--------------------------------------------------------------------------------------------*/
-		[Test]
-		public void AddQueryParams() {
+		[TestCase(false)]
+		[TestCase(true)]
+		public void AddQueryParams(bool pCacheScript) {
 			const string script = "testScript";
 			const string paramJson = "{\"a\":\"valueA\",\"B\":\"ValueB\"}";
 
@@ -71,10 +79,16 @@ namespace RexConnectClient.Test.RcCore.Transfer {
 
 			var r = new Request();
 
-			RequestCmd cmd = r.AddQuery(script, param);
+			RequestCmd cmd = r.AddQuery(script, param, pCacheScript);
 
 			AssertCmdList(r, 1);
-			AssertCmd(cmd, "query", script, paramJson);
+			
+			if ( pCacheScript ) {
+				AssertCmd(cmd, "query", script, paramJson, "1");
+			}
+			else {
+				AssertCmd(cmd, "query", script, paramJson);
+			}
 		}
 		
 		/*--------------------------------------------------------------------------------------------*/

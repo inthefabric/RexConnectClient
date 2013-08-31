@@ -79,7 +79,7 @@ namespace RexConnectClient.Test.RcCore.Transfer {
 		
 		/*--------------------------------------------------------------------------------------------*/
 		[Test]
-		public void EnableOption() {
+		public void EnableOptions() {
 			var rc = new RequestCmd();
 			rc.EnableOption(RequestCmd.Option.OmitTimer);
 			rc.EnableOption(RequestCmd.Option.OmitResults);

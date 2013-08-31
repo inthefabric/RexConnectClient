@@ -21,7 +21,7 @@ namespace RexConnectClient.Core.Transfer {
 		public string Err { get; set; }
 		
 		[DataMember(Name="k")]
-		public string CacheKey { get; set; }
+		public int? CacheKey { get; set; }
 
 	}
 
