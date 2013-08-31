@@ -44,13 +44,14 @@ namespace RexConnectClient.Core.Transfer {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		/*--------------------------------------------------------------------------------------------*/
-		public virtual RequestCmd AddQuery(string pScript) {
-			return AddCmd(RequestCmd.CreateQuery(pScript));
+		public virtual RequestCmd AddQuery(string pScript, bool pCacheScript=false) {
+			return AddCmd(RequestCmd.CreateQuery(pScript, pCacheScript));
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
-		public virtual RequestCmd AddQuery(string pScript, IDictionary<string, string> pParams) {
-			return AddCmd(RequestCmd.CreateQuery(pScript, pParams));
+		public virtual RequestCmd AddQuery(string pScript, IDictionary<string, string> pParams, 
+																			bool pCacheScript=false) {
+			return AddCmd(RequestCmd.CreateQuery(pScript, pParams, pCacheScript));
 		}
 
 		/*--------------------------------------------------------------------------------------------*/

@@ -60,13 +60,17 @@ namespace RexConnectClient.Core.Transfer {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		/*--------------------------------------------------------------------------------------------*/
-		internal static RequestCmd CreateQuery(string pScript) {
-			return new RequestCmd(RexConn.Command.Query.ToString().ToLower(), JsonUnquote(pScript));
+		internal static RequestCmd CreateQuery(string pScript, bool pCacheScript=false) {
+			string q = JsonUnquote(pScript);
+			string c = (pCacheScript ? "1" : null);
+			return new RequestCmd(RexConn.Command.Query.ToString().ToLower(), q, null, c);
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
-		internal static RequestCmd CreateQuery(string pScript, IDictionary<string, string> pParams) {
+		internal static RequestCmd CreateQuery(string pScript, IDictionary<string, string> pParams, 
+																			bool pCacheScript=false) {
 			string q = JsonUnquote(pScript);
+			string c = (pCacheScript ? "1" : null);
 			var sb = new StringBuilder();
 
 			foreach ( string key in pParams.Keys ) {
@@ -77,7 +81,7 @@ namespace RexConnectClient.Core.Transfer {
 				);
 			}
 
-			return new RequestCmd(RexConn.Command.Query.ToString().ToLower(), q, "{"+sb+"}");
+			return new RequestCmd(RexConn.Command.Query.ToString().ToLower(), q, "{"+sb+"}", c);
 		}
 
 		/*--------------------------------------------------------------------------------------------*/

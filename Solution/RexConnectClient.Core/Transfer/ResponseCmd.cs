@@ -19,6 +19,9 @@ namespace RexConnectClient.Core.Transfer {
 
 		[DataMember(Name="e")]
 		public string Err { get; set; }
+		
+		[DataMember(Name="k")]
+		public string CacheKey { get; set; }
 
 	}
 
