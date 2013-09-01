@@ -29,7 +29,7 @@ namespace RexConnectClient.Core.Result {
 		/*--------------------------------------------------------------------------------------------*/
 		public ResponseResult(IRexConnContext pContext) {
 			Context = pContext;
-			Request = pContext.Request;
+			Request = BuildRequest();
 			RequestJson = Request.ToRequestJson();
 		}
 
@@ -40,7 +40,7 @@ namespace RexConnectClient.Core.Result {
 			}
 			
 			ResponseJson = pResponseJson;
-			Response = JsonSerializer.DeserializeFromString<Response>(ResponseJson);
+			Response = BuildResponse();
 
 			if ( Response == null ) {
 				IsError = true;
@@ -76,6 +76,49 @@ namespace RexConnectClient.Core.Result {
 			else {
 				Response.Err += "|"+pErr;
 			}
+		}
+		
+		
+		////////////////////////////////////////////////////////////////////////////////////////////////
+		/*--------------------------------------------------------------------------------------------*/
+		//TEST: BuildRequest
+		private Request BuildRequest() {
+			Request req = Context.Request;
+			
+			foreach ( RequestCmd cmd in req.CmdList ) {
+				
+				if ( !cmd.IsQueryToBeCached() ) {
+					continue;
+				}
+				
+				int? cacheKey = Context.Cache.FindScriptKey(cmd.Args[0]);
+				
+				if ( cacheKey != null ) {
+					RequestCmd.ConvertToQueryC(cmd, (int)cacheKey);
+				}
+			}
+			
+			return req;
+		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		//TEST: BuildResponse
+		private Response BuildResponse() {
+			Response resp = JsonSerializer.DeserializeFromString<Response>(ResponseJson);
+			int n = Request.CmdList.Count;
+			
+			for ( int i = 0 ; i < n ; ++i ) {
+				ResponseCmd cmdResp = resp.CmdList[i];
+				
+				if ( cmdResp.CacheKey == null ) {
+					continue;
+				}
+				
+				RequestCmd cmd = Request.CmdList[i];
+				Context.Cache.AddCachedScript((int)cmdResp.CacheKey, cmd.Args[0]);
+			}
+			
+			return resp;
 		}
 
 

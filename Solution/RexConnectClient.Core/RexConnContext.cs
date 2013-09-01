@@ -1,6 +1,7 @@
 ﻿using System;
 using RexConnectClient.Core.Result;
 using RexConnectClient.Core.Transfer;
+using RexConnectClient.Core.Cache;
 
 namespace RexConnectClient.Core {
 	
@@ -13,7 +14,9 @@ namespace RexConnectClient.Core {
 		public bool UseHttp { get; private set; }
 		public string GraphName { get; private set; }
 		public LogFunc Logger { get; set; }
-
+		
+		private IRexConnCacheProvider vCacheProv;
+		
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		/*--------------------------------------------------------------------------------------------*/
@@ -44,6 +47,25 @@ namespace RexConnectClient.Core {
 			UseHttp = pUseHttp;
 			GraphName = pGraphName;
 		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		//TEST: SetCacheProvider
+		public virtual void SetCacheProvider(IRexConnCacheProvider pCacheProvider) {
+			vCacheProv = pCacheProvider;
+		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		//TEST: Cache.get
+		public IRexConnCache Cache {
+			get {
+				if ( vCacheProv == null ) {
+					throw new Exception("The CacheProvider was not set.");
+				}
+				
+				return vCacheProv.GetCache(HostName, Port);
+			}
+		}
+		
 
 
 

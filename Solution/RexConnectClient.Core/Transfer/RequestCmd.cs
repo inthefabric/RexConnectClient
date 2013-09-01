@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text;
+using System;
 
 namespace RexConnectClient.Core.Transfer {
 
@@ -56,6 +57,16 @@ namespace RexConnectClient.Core.Transfer {
 
 			Opt = (byte)(Opt | (byte)pOption);
 		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		//TEST: IsQueryToBeCached
+		public bool IsQueryToBeCached() {
+			if ( Cmd != RexConn.Command.Query.ToString().ToLower() ) {
+				return false;
+			}
+			
+			return (Args.Count == 3 && Args[2] == "1");
+		}
 
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
@@ -67,17 +78,7 @@ namespace RexConnectClient.Core.Transfer {
 			args[0] = JsonUnquote(pScript);
 			
 			if ( pParams != null ) {
-				var sb = new StringBuilder();
-	
-				foreach ( string key in pParams.Keys ) {
-					sb.Append(
-						(sb.Length > 0 ? "," : "")+
-						"\""+JsonUnquote(key)+"\":"+
-						"\""+JsonUnquote(pParams[key])+"\""
-					);
-				}
-				
-				args[1] = "{"+sb+"}";
+				args[1] = GetParamsJson(pParams);
 			}
 			
 			if ( pCacheScript ) {
@@ -85,6 +86,36 @@ namespace RexConnectClient.Core.Transfer {
 			}
 
 			return new RequestCmd(RexConn.Command.Query.ToString().ToLower(), args);
+		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		//TEST: CreateQueryC
+		internal static RequestCmd CreateQueryC(int pCacheKey, IDictionary<string,string> pParams=null){
+			string queryc = RexConn.Command.QueryC.ToString().ToLower();
+			string key = pCacheKey+"";
+			
+			if ( pParams == null ) {
+				return new RequestCmd(queryc, key);
+			}
+			
+			return new RequestCmd(queryc, key, GetParamsJson(pParams));
+		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		//TEST: ConvertToQueryC
+		internal static void ConvertToQueryC(RequestCmd pQueryCmd, int pCacheKey) {
+			if ( !pQueryCmd.IsQueryToBeCached() ) {
+				throw new Exception("IsQueryToBeCached is false for this command.");
+			}
+			
+			pQueryCmd.Cmd = RexConn.Command.QueryC.ToString().ToLower();
+			
+			if ( pQueryCmd.Args.Count == 1 ) {
+				pQueryCmd.Args[0] = pCacheKey+"";
+			}
+			else {
+				pQueryCmd.Args = new[] { pCacheKey+"", pQueryCmd.Args[1] };
+			}
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
@@ -104,6 +135,21 @@ namespace RexConnectClient.Core.Transfer {
 		/*--------------------------------------------------------------------------------------------*/
 		private static string JsonUnquote(string pText) {
 			return pText.Replace("\"", "\\\"");
+		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		private static string GetParamsJson(IDictionary<string, string> pParams) {
+			var sb = new StringBuilder();
+			
+			foreach ( string key in pParams.Keys ) {
+				sb.Append(
+					(sb.Length > 0 ? "," : "")+
+					"\""+JsonUnquote(key)+"\":"+
+					"\""+JsonUnquote(pParams[key])+"\""
+					);
+			}
+			
+			return "{"+sb+"}";
 		}
 
 	}

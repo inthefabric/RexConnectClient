@@ -6,6 +6,7 @@
 		public enum Command {
 			Session = 1,
 			Query,
+			QueryC,
 			Config
 		}
 

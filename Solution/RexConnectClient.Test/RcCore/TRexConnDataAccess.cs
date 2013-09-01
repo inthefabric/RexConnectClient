@@ -5,6 +5,7 @@ using System.Threading;
 using Moq;
 using NUnit.Framework;
 using RexConnectClient.Core;
+using RexConnectClient.Core.Cache;
 using RexConnectClient.Core.Result;
 using RexConnectClient.Core.Transfer;
 using RexConnectClient.Test.Utils;
@@ -523,6 +524,7 @@ namespace RexConnectClient.Test.RcCore {
 		private RexConnDataAccess BuildDataAccess(Request pReq, bool pUseHttp) {
 			var ctx = new RexConnContext(pReq, RexConnHost, (pUseHttp ? 8182 : RexConnPort));
 			ctx.SetHttpMode(pUseHttp, "graph");
+			ctx.SetCacheProvider(new RexConnCacheProvider());
 			ctx.Logger = (level, category, text, ex) => {};
 			return new RexConnDataAccess(ctx);
 		}

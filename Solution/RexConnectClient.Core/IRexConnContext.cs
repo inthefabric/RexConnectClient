@@ -1,6 +1,7 @@
 ﻿using System;
 using RexConnectClient.Core.Result;
 using RexConnectClient.Core.Transfer;
+using RexConnectClient.Core.Cache;
 
 namespace RexConnectClient.Core {
 	
@@ -21,6 +22,15 @@ namespace RexConnectClient.Core {
 
 		/*--------------------------------------------------------------------------------------------*/
 		IRexConnTcp CreateTcpClient();
+		
+		/*--------------------------------------------------------------------------------------------*/
+		void SetHttpMode(bool pUseHttp, string pGraphName);
+		
+		/*--------------------------------------------------------------------------------------------*/
+		void SetCacheProvider(IRexConnCacheProvider pCacheProvider);
+		
+		/*--------------------------------------------------------------------------------------------*/
+		IRexConnCache Cache { get; }
 
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
