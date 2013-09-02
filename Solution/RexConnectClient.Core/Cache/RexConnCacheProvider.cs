@@ -3,7 +3,6 @@
 namespace RexConnectClient.Core.Cache {
 
 	/*================================================================================================*/
-	//TEST: RexConnCacheProvider
 	public class RexConnCacheProvider : IRexConnCacheProvider {
 	
 		private IDictionary<string, IRexConnCache> vCacheMap;
@@ -24,6 +23,11 @@ namespace RexConnectClient.Core.Cache {
 			}
 			
 			return vCacheMap[key];
+		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		public int GetCacheCount() {
+			return vCacheMap.Count;
 		}
 
 	}

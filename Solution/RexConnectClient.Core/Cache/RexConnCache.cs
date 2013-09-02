@@ -4,7 +4,6 @@ using System;
 namespace RexConnectClient.Core.Cache {
 
 	/*================================================================================================*/
-	//TEST: RexConnCache
 	public class RexConnCache : IRexConnCache {
 	
 		public string HostName { get; private set; }
@@ -30,6 +29,11 @@ namespace RexConnectClient.Core.Cache {
 			}
 			
 			throw new KeyNotFoundException("No script found for cache key '"+pCacheKey+"'.");
+		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		public int GetKeyCount() {
+			return vScriptMap.Count;
 		}
 		
 		/*--------------------------------------------------------------------------------------------*/
