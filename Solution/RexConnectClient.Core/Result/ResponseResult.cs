@@ -105,7 +105,12 @@ namespace RexConnectClient.Core.Result {
 		//TEST: BuildResponse
 		private Response BuildResponse() {
 			Response resp = JsonSerializer.DeserializeFromString<Response>(ResponseJson);
-			int n = Request.CmdList.Count;
+			
+			if ( resp == null || resp.CmdList == null ) {
+				return resp;
+			}
+			
+			int n = resp.CmdList.Count;
 			
 			for ( int i = 0 ; i < n ; ++i ) {
 				ResponseCmd cmdResp = resp.CmdList[i];
