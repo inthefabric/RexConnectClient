@@ -48,6 +48,11 @@ namespace RexConnectClient.Core.Transfer {
 																			bool pCacheScript=false) {
 			return AddCmd(RequestCmd.CreateQuery(pScript, pParams, pCacheScript));
 		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		public virtual RequestCmd AddQueryC(int pCacheKey, IDictionary<string, string> pParams=null) {
+			return AddCmd(RequestCmd.CreateQueryC(pCacheKey, pParams));
+		}
 
 		/*--------------------------------------------------------------------------------------------*/
 		public virtual RequestCmd AddSessionAction(RexConn.SessionAction pAction) {

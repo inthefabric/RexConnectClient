@@ -59,7 +59,6 @@ namespace RexConnectClient.Core.Transfer {
 		}
 		
 		/*--------------------------------------------------------------------------------------------*/
-		//TEST: IsQueryToBeCached
 		public bool IsQueryToBeCached() {
 			if ( Cmd != RexConn.Command.Query.ToString().ToLower() ) {
 				return false;
@@ -89,7 +88,6 @@ namespace RexConnectClient.Core.Transfer {
 		}
 		
 		/*--------------------------------------------------------------------------------------------*/
-		//TEST: CreateQueryC
 		internal static RequestCmd CreateQueryC(int pCacheKey, IDictionary<string,string> pParams=null){
 			string queryc = RexConn.Command.QueryC.ToString().ToLower();
 			string key = pCacheKey+"";
@@ -102,7 +100,6 @@ namespace RexConnectClient.Core.Transfer {
 		}
 		
 		/*--------------------------------------------------------------------------------------------*/
-		//TEST: ConvertToQueryC
 		internal static void ConvertToQueryC(RequestCmd pQueryCmd, int pCacheKey) {
 			if ( !pQueryCmd.IsQueryToBeCached() ) {
 				throw new Exception("IsQueryToBeCached is false for this command.");

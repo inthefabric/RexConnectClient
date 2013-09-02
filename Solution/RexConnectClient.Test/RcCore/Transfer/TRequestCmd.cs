@@ -85,6 +85,27 @@ namespace RexConnectClient.Test.RcCore.Transfer {
 			rc.EnableOption(RequestCmd.Option.OmitResults);
 			Assert.AreEqual(3, rc.Opt, "Incorrect Opt.");
 		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		[TestCase("query", true, true)]
+		[TestCase("query", false, false)]
+		[TestCase("query", null, false)]
+		[TestCase("config", null, false)]
+		[TestCase("query2", true, false)]
+		[TestCase("QUERY", true, false)]
+		public void IsQueryToBeCached(string pCommand, bool? pCacheQuery, bool pExpect) {
+			var rc = new RequestCmd();
+			rc.Cmd = pCommand;
+			
+			if ( pCacheQuery != null ) {
+				rc.Args = new[] { "script", null, (pCacheQuery == true ? "1" : "0") };
+			}
+			else {
+				rc.Args = new string[0];
+			}
+			
+			Assert.AreEqual(pExpect, rc.IsQueryToBeCached(), "Incorrect result.");
+		}
 
 	}
 

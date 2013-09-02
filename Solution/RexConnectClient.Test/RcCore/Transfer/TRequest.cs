@@ -93,6 +93,36 @@ namespace RexConnectClient.Test.RcCore.Transfer {
 		
 		/*--------------------------------------------------------------------------------------------*/
 		[Test]
+		public void AddQueryC() {
+			const int cacheKey = 1234;
+			var r = new Request();
+			
+			RequestCmd cmd = r.AddQueryC(cacheKey, null);
+			
+			AssertCmdList(r, 1);
+			AssertCmd(cmd, "queryc", cacheKey+"");
+		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		[Test]
+		public void AddQueryCParams() {
+			const int cacheKey = 1234;
+			const string paramJson = "{\"a\":\"valueA\",\"B\":\"ValueB\"}";
+			
+			var param = new Dictionary<string, string>();
+			param.Add("a", "valueA");
+			param.Add("B", "ValueB");
+			
+			var r = new Request();
+			
+			RequestCmd cmd = r.AddQueryC(cacheKey, param);
+			
+			AssertCmdList(r, 1);
+			AssertCmd(cmd, "queryc", cacheKey+"", paramJson);
+		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		[Test]
 		public void AddSessionAction() {
 			var r = new Request();
 
