@@ -2,6 +2,10 @@
 using RexConnectClient.Core;
 using RexConnectClient.Core.Result;
 using RexConnectClient.Core.Transfer;
+using Moq;
+using RexConnectClient.Core.Cache;
+using RexConnectClient.Test.Utils;
+using System;
 
 namespace RexConnectClient.Test.RcCore {
 
@@ -48,6 +52,31 @@ namespace RexConnectClient.Test.RcCore {
 			Assert.NotNull(tcp, "Result should not be null.");
 			Assert.AreEqual(1<<16, tcp.SendBufferSize, "Incorrect result SendBufferSize.");
 			Assert.AreEqual(1<<16, tcp.ReceiveBufferSize, "Incorrect result ReceiveBufferSize.");
+		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		[Test]
+		public void GetCacheWithProvider() {
+			const string host = "local";
+			const int port = 1234;
+			
+			var r = new Request();
+			var mockProv = new Mock<IRexConnCacheProvider>();
+			var mockCache = new Mock<IRexConnCache>();
+			mockProv.Setup(x => x.GetCache(host, port)).Returns(mockCache.Object);
+			
+			var ctx = new RexConnContext(r, host, port);
+			ctx.SetCacheProvider(mockProv.Object);
+			
+			Assert.AreEqual(mockCache.Object, ctx.Cache, "Incorrect result.");
+		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		[Test]
+		public void GetCacheWithNoProvider() {
+			var r = new Request();
+			var ctx = new RexConnContext(r, "x", 0);
+			TestUtil.CheckThrows<NullReferenceException>(true, () => { var c = ctx.Cache; });
 		}
 
 		/*--------------------------------------------------------------------------------------------*/

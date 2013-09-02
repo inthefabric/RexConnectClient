@@ -49,25 +49,21 @@ namespace RexConnectClient.Core {
 		}
 		
 		/*--------------------------------------------------------------------------------------------*/
-		//TEST: SetCacheProvider
 		public virtual void SetCacheProvider(IRexConnCacheProvider pCacheProvider) {
 			vCacheProv = pCacheProvider;
 		}
 		
 		/*--------------------------------------------------------------------------------------------*/
-		//TEST: Cache.get
 		public IRexConnCache Cache {
 			get {
 				if ( vCacheProv == null ) {
-					throw new Exception("The CacheProvider was not set.");
+					throw new NullReferenceException("The CacheProvider was not set.");
 				}
 				
 				return vCacheProv.GetCache(HostName, Port);
 			}
 		}
 		
-
-
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		/*--------------------------------------------------------------------------------------------*/
