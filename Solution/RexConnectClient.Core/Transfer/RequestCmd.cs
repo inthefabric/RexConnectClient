@@ -106,12 +106,13 @@ namespace RexConnectClient.Core.Transfer {
 			}
 			
 			pQueryCmd.Cmd = RexConn.Command.QueryC.ToString().ToLower();
+			string paramsJson = pQueryCmd.Args[1];
 			
-			if ( pQueryCmd.Args.Count == 1 ) {
-				pQueryCmd.Args[0] = pCacheKey+"";
+			if ( paramsJson == null ) {
+				pQueryCmd.Args = new[] { pCacheKey+"" };
 			}
 			else {
-				pQueryCmd.Args = new[] { pCacheKey+"", pQueryCmd.Args[1] };
+				pQueryCmd.Args = new[] { pCacheKey+"", paramsJson };
 			}
 		}
 

@@ -81,7 +81,6 @@ namespace RexConnectClient.Core.Result {
 		
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		/*--------------------------------------------------------------------------------------------*/
-		//TEST: BuildRequest
 		private Request BuildRequest() {
 			Request req = Context.Request;
 			
@@ -102,7 +101,6 @@ namespace RexConnectClient.Core.Result {
 		}
 		
 		/*--------------------------------------------------------------------------------------------*/
-		//TEST: BuildResponse
 		private Response BuildResponse() {
 			Response resp = JsonSerializer.DeserializeFromString<Response>(ResponseJson);
 			

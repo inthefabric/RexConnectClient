@@ -8,6 +8,7 @@ using RexConnectClient.Core.Transfer;
 using RexConnectClient.Test.Common;
 using RexConnectClient.Test.Utils;
 using ServiceStack.Text;
+using RexConnectClient.Core.Cache;
 
 namespace RexConnectClient.Test.RcCore.Result {
 
@@ -123,6 +124,52 @@ namespace RexConnectClient.Test.RcCore.Result {
 			Assert.AreEqual(mockReq.Object, rr.Request, "Incorrect Request.");
 			Assert.AreEqual(json, rr.RequestJson, "Incorrect RequestJson.");
 		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		[Test]
+		public void NewWithCachedQueries() {
+			const int cacheKey = 234;
+			const string cachedScript = "this is my cached script";
+			const string expectParamsJson = "{\"A\":\"123\"}";
+			var querycParams = new Dictionary<string, string>();
+			querycParams.Add("A", "123");
+			
+			var req = new Request();
+			req.AddConfigSetting(RexConn.ConfigSetting.Pretty, "0");
+			req.AddQuery("not cached");
+			req.AddQuery(cachedScript, querycParams, true);
+			req.AddQuery(cachedScript, null, true);
+			
+			var mockCache = new Mock<IRexConnCache>();
+			mockCache.Setup(x => x.FindScriptKey(cachedScript)).Returns(cacheKey);
+			
+			var mockCtx = new Mock<IRexConnContext>();
+			mockCtx.SetupGet(x => x.Request).Returns(req);
+			mockCtx.SetupGet(x => x.Cache).Returns(mockCache.Object);
+			
+			var rr = new ResponseResult(mockCtx.Object);
+			
+			Assert.AreEqual(4, rr.Request.CmdList.Count, "Incorrect CmdList.Count.");
+			
+			RequestCmd rc0 = rr.Request.CmdList[0];
+			RequestCmd rc1 = rr.Request.CmdList[1];
+			RequestCmd rc2 = rr.Request.CmdList[2];
+			RequestCmd rc3 = rr.Request.CmdList[3];
+			
+			Assert.AreEqual("config", rc0.Cmd, "Incorrect Cmd0.Cmd.");
+			Assert.AreEqual("query", rc1.Cmd, "Incorrect Cmd1.Cmd.");
+			
+			Assert.AreEqual("queryc", rc2.Cmd, "Incorrect Cmd2.Cmd.");
+			Assert.NotNull(rc2.Args, "Cmd2.Args should be filled.");
+			Assert.AreEqual(2, rc2.Args.Count, "Incorrect Cmd2.Args.Count");
+			Assert.AreEqual(cacheKey+"", rc2.Args[0], "Incorrect Cmd2.Args[0].");
+			Assert.AreEqual(expectParamsJson, rc2.Args[1], "Incorrect Cmd2.Args[1].");
+			
+			Assert.AreEqual("queryc", rc3.Cmd, "Incorrect Cmd3.Cmd.");
+			Assert.NotNull(rc3.Args, "Cmd3.Args should be filled.");
+			Assert.AreEqual(1, rc3.Args.Count, "Incorrect Cmd3.Args.Count");
+			Assert.AreEqual(cacheKey+"", rc3.Args[0], "Incorrect Cmd3.Args[0].");
+		}
 
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
@@ -141,6 +188,40 @@ namespace RexConnectClient.Test.RcCore.Result {
 			Assert.False(vResult.IsError, "Incorrect IsError.");
 
 			vMockCtx.Verify(x => x.Log("Warn", "Data", It.IsAny<string>(), null), Times.Once());
+		}
+		
+		/*--------------------------------------------------------------------------------------------*/
+		[Test]
+		public void SetResponseJsonWithCached() {
+			const int cacheKey = 123;
+			const string cacheScript = "this is my script";
+			
+			var req = new Request();
+			req.ReqId = "testReqId";
+			req.AddQuery(cacheScript, null, true);
+			req.AddQuery("script2");
+			
+			var resp = new Response();
+			resp.ReqId = req.ReqId;
+			resp.CmdList = new List<ResponseCmd>();
+			resp.CmdList.Add(new ResponseCmd { CacheKey=cacheKey });
+			resp.CmdList.Add(new ResponseCmd { CacheKey=null });
+			
+			var mockCache = new Mock<IRexConnCache>();
+			
+			var mockCtx = new Mock<IRexConnContext>();
+			mockCtx.SetupGet(x => x.Request).Returns(req);
+			mockCtx.SetupGet(x => x.Cache).Returns(mockCache.Object);
+			
+			var rr = new ResponseResult(mockCtx.Object);
+			rr.SetResponseJson(JsonSerializer.SerializeToString(resp));
+			
+			Assert.NotNull(rr.Response, "Response should be filled.");
+			Assert.AreEqual(req.ReqId, rr.Response.ReqId, "Incorrect Response.ReqId.");
+			Assert.AreEqual(2, rr.Response.CmdList.Count, "Incorrect Response.CmdList.Count.");
+			Assert.False(rr.IsError, "Incorrect IsError.");
+			
+			mockCache.Verify(x => x.AddCachedScript(cacheKey, cacheScript), Times.Once());
 		}
 
 		/*--------------------------------------------------------------------------------------------*/
