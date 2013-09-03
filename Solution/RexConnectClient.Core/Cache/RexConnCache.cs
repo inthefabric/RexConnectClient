@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
-using System;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace RexConnectClient.Core.Cache {
 
@@ -9,7 +10,7 @@ namespace RexConnectClient.Core.Cache {
 		public string HostName { get; private set; }
 		public int Port { get; private set; }
 		
-		private IDictionary<int, string> vScriptMap;
+		private readonly ConcurrentDictionary<int, string> vScriptMap;
 		
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
@@ -17,7 +18,7 @@ namespace RexConnectClient.Core.Cache {
 		public RexConnCache(string pHostName, int pPort) {
 			HostName = pHostName;
 			Port = pPort;
-			vScriptMap = new Dictionary<int, string>();
+			vScriptMap = new ConcurrentDictionary<int, string>();
 		}
 		
 		
@@ -46,7 +47,7 @@ namespace RexConnectClient.Core.Cache {
 			
 			return null;
 		}
-		
+
 		/*--------------------------------------------------------------------------------------------*/
 		public void AddCachedScript(int pCacheKey, string pScript) {
 			if ( vScriptMap.ContainsKey(pCacheKey) ) {
@@ -58,8 +59,8 @@ namespace RexConnectClient.Core.Cache {
 					"Current: "+vScriptMap[pCacheKey]+"\n"+
 					"New:     "+pScript);
 			}
-			
-			vScriptMap.Add(pCacheKey, pScript);
+
+			vScriptMap.TryAdd(pCacheKey, pScript);
 		}
 
 	}

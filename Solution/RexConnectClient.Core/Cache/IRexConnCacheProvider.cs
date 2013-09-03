@@ -1,4 +1,6 @@
-﻿namespace RexConnectClient.Core.Cache {
+﻿using System.Collections.Generic;
+
+namespace RexConnectClient.Core.Cache {
 
 	/*================================================================================================*/
 	public interface IRexConnCacheProvider {
@@ -10,6 +12,9 @@
 		
 		/*--------------------------------------------------------------------------------------------*/
 		int GetCacheCount();
+
+		/*--------------------------------------------------------------------------------------------*/
+		ICollection<string> GetCacheKeys();
 
 	}
 

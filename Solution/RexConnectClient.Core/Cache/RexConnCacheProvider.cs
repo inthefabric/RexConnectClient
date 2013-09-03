@@ -1,33 +1,39 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace RexConnectClient.Core.Cache {
 
 	/*================================================================================================*/
 	public class RexConnCacheProvider : IRexConnCacheProvider {
-	
-		private IDictionary<string, IRexConnCache> vCacheMap;
+
+		private readonly ConcurrentDictionary<string, IRexConnCache> vCacheMap;
 		
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		/*--------------------------------------------------------------------------------------------*/
 		public RexConnCacheProvider() {
-			vCacheMap = new Dictionary<string, IRexConnCache>();
+			vCacheMap = new ConcurrentDictionary<string, IRexConnCache>();
 		}
-		
+
 		/*--------------------------------------------------------------------------------------------*/
 		public IRexConnCache GetCache(string pHostName, int pPort) {
 			string key = pHostName+":"+pPort;
-			
+
 			if ( !vCacheMap.ContainsKey(key) ) {
-				vCacheMap.Add(key, new RexConnCache(pHostName, pPort));
+				vCacheMap.TryAdd(key, new RexConnCache(pHostName, pPort));
 			}
-			
+
 			return vCacheMap[key];
 		}
-		
+
 		/*--------------------------------------------------------------------------------------------*/
 		public int GetCacheCount() {
 			return vCacheMap.Count;
+		}
+
+		/*--------------------------------------------------------------------------------------------*/
+		public ICollection<string> GetCacheKeys() {
+			return vCacheMap.Keys;
 		}
 
 	}

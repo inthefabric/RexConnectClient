@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using NUnit.Framework;
 using RexConnectClient.Core.Cache;
-using RexConnectClient.Test.Utils;
 
 namespace RexConnectClient.Test.RcCore.Cache {
 
@@ -47,6 +45,22 @@ namespace RexConnectClient.Test.RcCore.Cache {
 			Assert.AreNotEqual(c2, c3, "Cache 2/3 results should be different.");
 			
 			Assert.AreEqual(3, cp.GetCacheCount(), "Incorrect cache count.");
+		}
+
+		/*--------------------------------------------------------------------------------------------*/
+		[Test]
+		public void GetCacheKeys() {
+			var cp = new RexConnCacheProvider();
+			cp.GetCache("first", 1);
+			cp.GetCache("second", 2);
+			cp.GetCache("third", 3);
+
+			ICollection<string> keys = cp.GetCacheKeys();
+
+			Assert.AreEqual(3, keys.Count, "Incorrect key count.");
+			Assert.True(keys.Contains("first:1"), "Missing #1.");
+			Assert.True(keys.Contains("second:2"), "Missing #2.");
+			Assert.True(keys.Contains("third:3"), "Missing #3.");
 		}
 		
 	}
