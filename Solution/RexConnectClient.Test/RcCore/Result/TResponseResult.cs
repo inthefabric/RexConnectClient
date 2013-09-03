@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using Moq;
 using NUnit.Framework;
 using RexConnectClient.Core;
+using RexConnectClient.Core.Cache;
 using RexConnectClient.Core.Result;
 using RexConnectClient.Core.Transfer;
 using RexConnectClient.Test.Common;
 using RexConnectClient.Test.Utils;
 using ServiceStack.Text;
-using RexConnectClient.Core.Cache;
 
 namespace RexConnectClient.Test.RcCore.Result {
 

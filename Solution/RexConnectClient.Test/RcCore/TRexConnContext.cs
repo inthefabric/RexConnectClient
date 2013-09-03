@@ -1,11 +1,11 @@
-﻿using NUnit.Framework;
+﻿using System;
+using Moq;
+using NUnit.Framework;
 using RexConnectClient.Core;
+using RexConnectClient.Core.Cache;
 using RexConnectClient.Core.Result;
 using RexConnectClient.Core.Transfer;
-using Moq;
-using RexConnectClient.Core.Cache;
 using RexConnectClient.Test.Utils;
-using System;
 
 namespace RexConnectClient.Test.RcCore {
 

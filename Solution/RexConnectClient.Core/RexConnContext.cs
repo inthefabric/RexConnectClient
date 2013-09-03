@@ -1,7 +1,7 @@
 ﻿using System;
+using RexConnectClient.Core.Cache;
 using RexConnectClient.Core.Result;
 using RexConnectClient.Core.Transfer;
-using RexConnectClient.Core.Cache;
 
 namespace RexConnectClient.Core {
 	

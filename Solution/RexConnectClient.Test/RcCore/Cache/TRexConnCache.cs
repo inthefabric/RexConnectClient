@@ -1,8 +1,8 @@
-﻿using NUnit.Framework;
-using RexConnectClient.Core.Cache;
+﻿using System;
 using System.Collections.Generic;
+using NUnit.Framework;
+using RexConnectClient.Core.Cache;
 using RexConnectClient.Test.Utils;
-using System;
 
 namespace RexConnectClient.Test.RcCore.Cache {
 
