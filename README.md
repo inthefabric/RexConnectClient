@@ -40,3 +40,6 @@ IResponseResult result = data.Execute();
 #### Fabric
 
 RexConnect and RexConnectClient were built to support the [Fabric](https://github.com/inthefabric/Fabric) project.
+
+
+[![githalytics.com alpha](https://cruel-carlota.gopagoda.com/a591fd3d28f0f38ab762f471959496d5 "githalytics.com")](http://githalytics.com/inthefabric/RexConnectClient)
